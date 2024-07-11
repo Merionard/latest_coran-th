@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "hadith" ADD COLUMN     "number" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "numberInChapter" INTEGER NOT NULL DEFAULT 0;

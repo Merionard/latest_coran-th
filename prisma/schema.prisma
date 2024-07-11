@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  role UserRole @default(USER)
+  myAyats   ayat[] @relation("UserAyats")
+  myThemes  theme[] @relation("UserThemes")
+  ayatsLearned ayat[] @relation("AyatsLearned")
+  myHadiths   hadith[] @relation("UserHadiths")
+  hadithsLearned hadith[] @relation("hadithsLearned")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@id([provider, providerAccountId])
+}
+ 
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+ 
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@id([identifier, token])
+}
+ 
+
+model theme {
+  id        Int     @id @default(autoincrement())
+  name      String
+  parentId  Int?
+  ayats     ayat[] @relation("AyatThemes")
+  parent    theme?  @relation("ParentTheme", fields: [parentId], references: [id])
+  subThemes theme[] @relation("ParentTheme")
+  description String?
+  users      User[] @relation("UserThemes")
+  order     Int?
+}
+
+model sourate {
+  number Int @id
+  titre String
+  ayats ayat[]
+}
+
+model ayat {
+  id         Int    @id @default(autoincrement())
+  sourate_number    Int 
+  sourate sourate @relation(fields:[sourate_number],references:[number])
+  number     Int
+  content    String
+  traduction String?
+  theme      theme[]  @relation("AyatThemes")
+  users      User[] @relation("UserAyats")
+  usersLearn User[] @relation("AyatsLearned")
+  toLearn    Boolean @default(false)
+}
+
+
+
+model quran {
+  surah      Int
+  ayah       Int
+  ayah_text  String
+  hizb       Float?  @db.Real
+  page       Int
+  pagehindi  String
+  index      Int
+  surrahname String
+  chapter    Int
+  sajdah     Int
+  id         Int     @id @default(autoincrement())
+  traduction String?
+}
+
+model hadithBook {
+  id  Int @id
+  length Int
+  title String
+  author String
+  introduction String
+  titleTraductionEn String
+  authorTraductionEn String
+  introductionTraductionEn String
+  titleTraductionFr String?
+  authorTraductionFr String?
+  introductionTraductionFr String?
+  chapters hadithChapter[]
+}
+
+model hadithChapter {
+  id Int @id @default(autoincrement())
+  hadith_book_id    Int 
+  hadithBook hadithBook @relation(fields:[hadith_book_id],references:[id])
+  title String
+  titleEn String
+  titleFr String?
+  hadiths hadith[]
+  chapterNumber Int @default(0)
+}
+
+model hadith {
+id Int @id @default(autoincrement())
+hadith_chapter Int
+hadithChapter hadithChapter @relation(fields:[hadith_chapter],references:[id])
+content String
+traductionEn String
+traductionFr String?
+narratorEn String
+narratorFr String?
+  users      User[] @relation("UserHadiths")
+  usersLearn User[] @relation("hadithsLearned")
+inBookReference String?
+hadithReference String?
+
+}
