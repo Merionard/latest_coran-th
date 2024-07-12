@@ -1,5 +1,8 @@
 "use client";
-import { fetchHadithByBookId } from "@/components/serverActions/hadithAction";
+import {
+  addHadithOnTheme,
+  fetchHadithByBookId,
+} from "@/components/serverActions/hadithAction";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -9,12 +12,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { hadith } from "@prisma/client";
 import { SelectLabel } from "@radix-ui/react-select";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 type props = {
   books: Array<{ id: number; title: string }>;
+  themeId: number;
 };
 type lightHadith = {
   id: number;
@@ -22,13 +27,15 @@ type lightHadith = {
   hadithReference: string | null;
 };
 
-export const SearchHadith = ({ books }: props) => {
+export const SearchHadith = ({ books, themeId }: props) => {
   const [bookIdSelected, setBookIdSelected] = useState<null | number>(null);
   const [hadithSelected, setHadithSelected] = useState<null | number>(null);
   const [pageSelected, setPageSelected] = useState(1);
   const [hadithByBook, setHadithByBook] = useState<{
     [key: number]: lightHadith[];
   }>({});
+  const [totalPage, setTotalPage] = useState(1);
+  const router = useRouter();
 
   const loadHadithByBookId = async (bookId: number | null, page?: number) => {
     if (!bookId) return;
@@ -40,23 +47,45 @@ export const SearchHadith = ({ books }: props) => {
     );
     setHadithByBook((prevState) => ({
       ...prevState,
-      [bookId]: fetchedHadiths,
+      [bookId]: fetchedHadiths.hadiths,
     }));
+    setTotalPage(Math.ceil(fetchedHadiths.totalCount / 200));
     console.log(hadithByBook);
 
     setBookIdSelected(Number(bookId));
   };
+  const pageTable: number[] = [];
+  for (let i = 1; i <= totalPage; i++) {
+    pageTable.push(i);
+  }
+
+  const addHadith = async () => {
+    if (!hadithSelected) return;
+    try {
+      const updatedHadith = await addHadithOnTheme(hadithSelected, themeId);
+      if (updatedHadith) {
+        toast.success("Hadith rajouté avec succès!");
+        router.refresh();
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
 
   return (
-    <div>
+    <div className="flex gap-2 flex-wrap md:flex-nowrap justify-center">
       <Select onValueChange={(val) => loadHadithByBookId(Number(val))}>
-        <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="Select book hadith" />
+        <SelectTrigger className="text-xl">
+          <SelectValue placeholder="Sélectionner livre hadith" />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
             {books.map((b) => (
-              <SelectItem value={b.id.toString()} key={b.id}>
+              <SelectItem
+                value={b.id.toString()}
+                key={b.id}
+                className="text-3xl"
+              >
                 {b.title}
               </SelectItem>
             ))}
@@ -65,26 +94,40 @@ export const SearchHadith = ({ books }: props) => {
       </Select>
       {bookIdSelected && hadithByBook[bookIdSelected] && (
         <Select onValueChange={(val) => setHadithSelected(Number(val))}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select hadith" />
+          <SelectTrigger className="text-xl">
+            <SelectValue placeholder="Sélectionner référence" />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
               <SelectLabel>page {pageSelected}</SelectLabel>
               {hadithByBook[bookIdSelected].map((h) => (
                 <SelectItem value={h.id.toString()} key={h.id}>
-                  {h.hadithReference ?? h.inBookReference}
+                  {h.hadithReference && h.hadithReference.length > 0
+                    ? h.hadithReference
+                    : h.inBookReference?.replace(/:/g, "")}
                 </SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>
         </Select>
       )}
-      <Button
-        onClick={() => loadHadithByBookId(bookIdSelected, pageSelected + 1)}
+      <Select
+        onValueChange={(val) => loadHadithByBookId(bookIdSelected, Number(val))}
       >
-        page {pageSelected}
-      </Button>
+        <SelectTrigger className="text-xl">
+          <SelectValue placeholder="selectionner la page" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>
+            {pageTable.map((page) => (
+              <SelectItem value={page.toString()} key={page}>
+                page {page}
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        </SelectContent>
+      </Select>
+      <Button onClick={addHadith}>Ajouter au theme</Button>
     </div>
   );
 };

@@ -67,10 +67,48 @@ export const markHadithAsLearned = async (hadithId: number) => {
 };
 
 export const fetchHadithByBookId = async (bookId: number, skip: number) => {
-  return prisma.hadith.findMany({
-    select: { id: true, hadithReference: true, inBookReference: true },
-    where: { hadithChapter: { hadithBook: { id: bookId } } },
-    take: 200,
-    skip: skip,
+  const [totalCount, hadiths] = await Promise.all([
+    prisma.hadith.count({
+      where: { hadithChapter: { hadithBook: { id: bookId } } },
+    }),
+    prisma.hadith.findMany({
+      select: { id: true, hadithReference: true, inBookReference: true },
+      where: { hadithChapter: { hadithBook: { id: bookId } } },
+      take: 200,
+      skip: skip,
+    }),
+  ]);
+
+  return { totalCount, hadiths };
+};
+
+export const addHadithOnTheme = async (hadithId: number, themeId: number) => {
+  const session = await getAuthSession();
+  if (!session) {
+    throw new Error("Vous devez être connecté pour marquer en appris!");
+  }
+
+  return prisma.theme.update({
+    where: { id: themeId },
+    data: {
+      hadiths: { connect: { id: hadithId } },
+    },
+  });
+};
+
+export const removeHadithOnTheme = async (
+  hadithId: number,
+  themeId: number
+) => {
+  const session = await getAuthSession();
+  if (!session) {
+    throw new Error("Vous devez être connecté pour marquer en appris!");
+  }
+
+  return prisma.theme.update({
+    where: { id: themeId },
+    data: {
+      hadiths: { disconnect: { id: hadithId } },
+    },
   });
 };

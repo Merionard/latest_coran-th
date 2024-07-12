@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/prisma/client";
-import { ayat } from "@prisma/client";
+import { ayat, hadith } from "@prisma/client";
 import { MessageCircleWarning, Undo2 } from "lucide-react";
 import Link from "next/link";
 import { ThemeDialogForm } from "../../../components/clientComponents/theme/newThemeDialogForm";
@@ -16,6 +16,7 @@ import {
 } from "../../../components/serverActions/themeCoranAction";
 import ThemeSearchAyat from "../../../components/serverComponents/ThemeSearchAyat";
 import { SearchHadith } from "@/components/clientComponents/hadith/searchHadith";
+import { HadithItem } from "@/components/clientComponents/hadith/hadithItem";
 
 export default async function ViewTheme({
   params,
@@ -29,6 +30,7 @@ export default async function ViewTheme({
         include: { sourate: true },
         orderBy: [{ sourate_number: "asc" }, { number: "asc" }],
       },
+      hadiths: true,
       subThemes: true,
     },
   });
@@ -43,7 +45,13 @@ export default async function ViewTheme({
   const session = await getAuthSession();
   const user = await prisma.user.findFirst({
     where: { id: session?.user.id },
-    include: { myAyats: true, myThemes: true, ayatsLearned: true },
+    include: {
+      myAyats: true,
+      myThemes: true,
+      ayatsLearned: true,
+      myHadiths: true,
+      hadithsLearned: true,
+    },
   });
 
   let books: any[] = [];
@@ -69,6 +77,20 @@ export default async function ViewTheme({
     if (!session) return false;
     if (user) {
       return user.myThemes.some((t) => t.id === theme.id);
+    }
+    return false;
+  };
+  const isHadithFavorite = (hadith: hadith) => {
+    if (!session) return false;
+    if (user) {
+      return user.myHadiths.some((h) => h.id === hadith.id);
+    }
+    return false;
+  };
+  const isHadithLearned = (hadith: hadith) => {
+    if (!session) return false;
+    if (user) {
+      return user.hadithsLearned.some((h) => h.id === hadith.id);
     }
     return false;
   };
@@ -192,7 +214,20 @@ export default async function ViewTheme({
       {session && session.user.role === "ADMIN" && (
         <div>
           <h4 className="text-center text-4xl my-3">Hadiths</h4>
-          <SearchHadith books={books} />
+          <div className="m-auto w-3/4 my-5 md:my-16">
+            <SearchHadith books={books} themeId={theme.id} />
+          </div>
+          <div className="space-y-5">
+            {theme.hadiths.map((h) => (
+              <HadithItem
+                hadith={h}
+                isFavorite={isHadithFavorite(h)}
+                isLearned={isHadithLearned(h)}
+                key={h.id}
+                themeId={theme.id}
+              />
+            ))}
+          </div>
         </div>
       )}
       {getSubThemeContent()}

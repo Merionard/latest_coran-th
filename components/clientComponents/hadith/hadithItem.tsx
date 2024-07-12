@@ -2,6 +2,7 @@
 
 import {
   markHadithAsLearned,
+  removeHadithOnTheme,
   toogleFavoriteHadith,
 } from "@/components/serverActions/hadithAction";
 import {
@@ -12,7 +13,7 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 import { hadith } from "@prisma/client";
-import { BookCheck, Heart } from "lucide-react";
+import { BookCheck, Heart, Trash } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ type props = {
     bookName: string;
     chapterName: string;
   };
+  themeId?: number;
 };
 
 export const HadithItem = ({
@@ -38,6 +40,7 @@ export const HadithItem = ({
   metadata,
   isFavorite,
   isLearned,
+  themeId,
 }: props) => {
   const router = useRouter();
   const { data: session } = useSession();
@@ -69,6 +72,17 @@ export const HadithItem = ({
     } else {
       setLanguage("FR");
     }
+  };
+
+  const removeFromTheme = async () => {
+    if (themeId)
+      try {
+        await removeHadithOnTheme(hadith.id, themeId);
+        toast.success("Hadith supprimé du thème avec succès");
+        router.refresh();
+      } catch (error: any) {
+        toast.error(error.message);
+      }
   };
 
   return (
@@ -120,8 +134,22 @@ export const HadithItem = ({
               </button>
             </>
           )}
+          {session && themeId && (
+            <button
+              className={cn(
+                "flex justify-center items-center rounded-full border p-2"
+              )}
+              onClick={removeFromTheme}
+            >
+              <Trash className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
+      <p className="font-bold">Hadith numéro: {hadith.hadithReference}</p>
+      <p className="font-bold">
+        reference in book: {hadith.inBookReference?.replace(/:/g, "")}
+      </p>
       <div className="md:hidden flex justify-end">
         <button className=" rounded-full  " onClick={toogleLanguage}>
           {language === "FR" ? (
