@@ -95,7 +95,7 @@ export default async function ViewTheme({
     return false;
   };
 
-  console.log("test");
+  console.log("test22");
 
   const getAyatContent = () => {
     if (!session && theme.subThemes.length === 0 && theme.ayats.length === 0) {
