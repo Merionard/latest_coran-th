@@ -15,6 +15,7 @@ import {
   updateTheme,
 } from "../../../components/serverActions/themeCoranAction";
 import ThemeSearchAyat from "../../../components/serverComponents/ThemeSearchAyat";
+import { SearchHadith } from "@/components/clientComponents/hadith/searchHadith";
 
 export default async function ViewTheme({
   params,
@@ -44,6 +45,14 @@ export default async function ViewTheme({
     where: { id: session?.user.id },
     include: { myAyats: true, myThemes: true, ayatsLearned: true },
   });
+
+  let books: any[] = [];
+  if (session && session.user.role === "ADMIN") {
+    books = await prisma.hadithBook.findMany({
+      select: { id: true, title: true },
+    });
+  }
+
   const isAyatFavorite = (ayat: ayat) => {
     if (!session) return false;
     if (user) return user.myAyats.some((a) => a.id === ayat.id);
@@ -64,7 +73,7 @@ export default async function ViewTheme({
     return false;
   };
 
-  const getContent = () => {
+  const getAyatContent = () => {
     if (!session && theme.subThemes.length === 0 && theme.ayats.length === 0) {
       return (
         <Alert>
@@ -91,7 +100,7 @@ export default async function ViewTheme({
               <p>{theme.description}</p>
             </div>
           )}
-
+          <h3 className="text-center text-4xl my-3">Ayats</h3>
           <div className="space-y-5 pt-5  p-3 md:p-6">
             {theme?.ayats.map((a) => (
               <AyatCard
@@ -105,7 +114,14 @@ export default async function ViewTheme({
             ))}
           </div>
         </div>
-        {theme.subThemes.length > 0 && (
+      </div>
+    );
+  };
+
+  const getSubThemeContent = () => {
+    if (theme && theme.subThemes) {
+      return (
+        theme.subThemes.length > 0 && (
           <div>
             {theme.ayats.length > 0 && (
               <hr className="mx-auto w-3/4 border-2 border-black" />
@@ -126,9 +142,9 @@ export default async function ViewTheme({
               </Link>
             ))}
           </div>
-        )}
-      </div>
-    );
+        )
+      );
+    }
   };
 
   return (
@@ -172,7 +188,14 @@ export default async function ViewTheme({
           </>
         )}
       </div>
-      {getContent()}
+      {getAyatContent()}
+      {session && session.user.role === "ADMIN" && (
+        <div>
+          <h4 className="text-center text-4xl my-3">Hadiths</h4>
+          <SearchHadith books={books} />
+        </div>
+      )}
+      {getSubThemeContent()}
     </div>
   );
 }

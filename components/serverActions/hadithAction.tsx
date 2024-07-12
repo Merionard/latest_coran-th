@@ -65,3 +65,12 @@ export const markHadithAsLearned = async (hadithId: number) => {
     },
   });
 };
+
+export const fetchHadithByBookId = async (bookId: number, skip: number) => {
+  return prisma.hadith.findMany({
+    select: { id: true, hadithReference: true, inBookReference: true },
+    where: { hadithChapter: { hadithBook: { id: bookId } } },
+    take: 200,
+    skip: skip,
+  });
+};

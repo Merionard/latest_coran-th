@@ -82,6 +82,7 @@ model theme {
   description String?
   users      User[] @relation("UserThemes")
   order     Int?
+  hadiths   hadith[] @relation("HadithThemes")
 }
 
 model sourate {
@@ -155,9 +156,9 @@ traductionEn String
 traductionFr String?
 narratorEn String
 narratorFr String?
-  users      User[] @relation("UserHadiths")
-  usersLearn User[] @relation("hadithsLearned")
+users      User[] @relation("UserHadiths")
+usersLearn User[] @relation("hadithsLearned")
 inBookReference String?
 hadithReference String?
-
+theme      theme[]  @relation("HadithThemes")
 }
