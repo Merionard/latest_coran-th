@@ -213,7 +213,7 @@ export default async function ViewTheme({
       {getAyatContent()}
 
       <div>
-        <h4 className="text-center text-4xl my-3">Hadiths</h4>
+        <h4 className="text-center text-4xl my-4">Hadiths</h4>
         <div className="m-auto w-3/4 my-5 md:my-16">
           <SearchHadith books={books} themeId={theme.id} />
         </div>
