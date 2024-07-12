@@ -55,7 +55,7 @@ export default async function ViewTheme({
   });
 
   let books: any[] = [];
-  if (session && session.user.role === "ADMIN") {
+  if (session) {
     books = await prisma.hadithBook.findMany({
       select: { id: true, title: true },
     });

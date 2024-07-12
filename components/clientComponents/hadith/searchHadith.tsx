@@ -55,7 +55,7 @@ export const SearchHadith = ({ books, themeId }: props) => {
     setBookIdSelected(Number(bookId));
   };
   const pageTable: number[] = [];
-  for (let i = 1; i <= totalPage; i++) {
+  for (let i = 1; i < totalPage; i++) {
     pageTable.push(i);
   }
 
