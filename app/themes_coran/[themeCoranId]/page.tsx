@@ -211,25 +211,25 @@ export default async function ViewTheme({
         )}
       </div>
       {getAyatContent()}
-      {session && session.user.role === "ADMIN" && (
-        <div>
-          <h4 className="text-center text-4xl my-3">Hadiths</h4>
-          <div className="m-auto w-3/4 my-5 md:my-16">
-            <SearchHadith books={books} themeId={theme.id} />
-          </div>
-          <div className="space-y-5">
-            {theme.hadiths.map((h) => (
-              <HadithItem
-                hadith={h}
-                isFavorite={isHadithFavorite(h)}
-                isLearned={isHadithLearned(h)}
-                key={h.id}
-                themeId={theme.id}
-              />
-            ))}
-          </div>
+
+      <div>
+        <h4 className="text-center text-4xl my-3">Hadiths</h4>
+        <div className="m-auto w-3/4 my-5 md:my-16">
+          <SearchHadith books={books} themeId={theme.id} />
         </div>
-      )}
+        <div className="space-y-5">
+          {theme.hadiths.map((h) => (
+            <HadithItem
+              hadith={h}
+              isFavorite={isHadithFavorite(h)}
+              isLearned={isHadithLearned(h)}
+              key={h.id}
+              themeId={theme.id}
+            />
+          ))}
+        </div>
+      </div>
+
       {getSubThemeContent()}
     </div>
   );
