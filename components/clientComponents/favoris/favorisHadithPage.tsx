@@ -1,6 +1,6 @@
 "use client";
 
-import { hadithUser } from "@/app/mes_hadiths/page";
+import { HadithUser } from "@/app/mes_hadiths/page";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { BookCheck, Heart, MessageCircleWarning } from "lucide-react";
@@ -8,7 +8,7 @@ import { useState } from "react";
 import { HadithItem } from "../hadith/hadithItem";
 
 type props = {
-  hadithsUser: hadithUser;
+  hadithsUser: HadithUser;
 };
 
 export const FavorisHadithPage = ({ hadithsUser }: props) => {
