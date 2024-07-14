@@ -15,19 +15,17 @@ export type ThemeWithSubThemes = Prisma.themeGetPayload<
 >;
 
 export default async function Themes() {
-  const themes = await prisma.theme.findMany({
-    include: { subThemes: true, ayats: true },
-    orderBy: { order: "asc" },
-  });
-
-  const session = await getAuthSession();
+  const [themes, session] = await Promise.all([
+    prisma.theme.findMany({
+      include: { subThemes: true, ayats: true },
+      orderBy: { order: "asc" },
+    }),
+    getAuthSession(),
+  ]);
 
   return (
     <div>
-      <ListThemes
-        themes={themes}
-        admin={session !== null && session.user.role === "ADMIN"}
-      />
+      <ListThemes themes={themes} admin={session?.user?.role === "ADMIN"} />
     </div>
   );
 }

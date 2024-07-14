@@ -32,81 +32,74 @@ type props = {
   learnedAyat: ayat[];
 };
 
-export const FavorisPage = ({ favorisAyat, learnedAyat }: props) => {
+const FavorisPage = ({ favorisAyat, learnedAyat }: props) => {
   const [favorisView, setFavorisView] = useState(true);
 
-  const isAyatFavorite = (ayat: ayat) => {
-    return favorisAyat.some((a) => a.id === ayat.id);
-  };
-
-  const isAyatLearned = (ayat: ayat) => {
-    return learnedAyat.some((a) => a.id === ayat.id);
-  };
+  const isAyatFavorite = (ayat: ayat) =>
+    favorisAyat.some((a) => a.id === ayat.id);
+  const isAyatLearned = (ayat: ayat) =>
+    learnedAyat.some((a) => a.id === ayat.id);
 
   return (
     <div>
-      <div className="flex justify-end  mb-2">
+      <div className="flex justify-end mb-2">
         <Button
-          variant={"outline"}
+          variant="outline"
           className={favorisView ? "rounded-none bg-secondary" : "rounded-none"}
-          size={"icon"}
+          size="icon"
           onClick={() => setFavorisView(true)}
         >
           <Heart />
         </Button>
         <Button
-          variant={"outline"}
+          variant="outline"
           className={
             !favorisView ? "rounded-none bg-secondary" : "rounded-none"
           }
-          size={"icon"}
+          size="icon"
           onClick={() => setFavorisView(false)}
         >
           <BookCheck />
         </Button>
       </div>
-      {favorisView && favorisAyat.length === 0 && (
+      {favorisView ? (
+        favorisAyat.length === 0 ? (
+          <Alert>
+            <MessageCircleWarning className="h-4 w-4" />
+            <AlertTitle>Oups</AlertTitle>
+            <AlertDescription>
+              Vous n&apos;avez pas encore de favoris!
+            </AlertDescription>
+          </Alert>
+        ) : (
+          <div className="space-y-5">
+            {favorisAyat.map((ayat) => (
+              <AyatCard
+                key={ayat.id}
+                ayat={ayat}
+                titreSourate={ayat.sourate.titre}
+                isFavorite={isAyatFavorite(ayat)}
+                themes={ayat.theme}
+                isLearned={isAyatLearned(ayat)}
+              />
+            ))}
+          </div>
+        )
+      ) : learnedAyat.length === 0 ? (
         <Alert>
           <MessageCircleWarning className="h-4 w-4" />
-
           <AlertTitle>Oups</AlertTitle>
           <AlertDescription>
-            Vous n&apos; avez pas encore de favoris!
+            Vous n&apos;avez pas encore de ayat apprise!
           </AlertDescription>
         </Alert>
-      )}
-      {!favorisView && learnedAyat.length === 0 && (
-        <Alert>
-          <MessageCircleWarning className="h-4 w-4" />
-
-          <AlertTitle>Oups</AlertTitle>
-          <AlertDescription>
-            Vous n&apos; avez pas encore de ayat apprise!
-          </AlertDescription>
-        </Alert>
-      )}
-      {favorisView && (
-        <div className="space-y-5">
-          {favorisAyat.map((ayat) => (
-            <AyatCard
-              ayat={ayat}
-              titreSourate={ayat.sourate.titre}
-              key={ayat.id}
-              isFavorite={isAyatFavorite(ayat)}
-              themes={ayat.theme}
-              isLearned={isAyatLearned(ayat)}
-            />
-          ))}
-        </div>
-      )}
-
-      {!favorisView && (
+      ) : (
         <div className="space-y-5">
           {learnedAyat.map((ayat) => (
             <AyatCard
+              key={ayat.id}
               ayat={ayat}
               titreSourate={ayat.sourate.titre}
-              key={ayat.id}
               isFavorite={isAyatFavorite(ayat)}
               themes={ayat.theme}
               isLearned={isAyatLearned(ayat)}
@@ -117,3 +110,5 @@ export const FavorisPage = ({ favorisAyat, learnedAyat }: props) => {
     </div>
   );
 };
+
+export default FavorisPage;

@@ -4,35 +4,43 @@ import { prisma } from "@/prisma/client";
 import { ayat } from "@prisma/client";
 
 export default async function ToLearn() {
-  const ayats = await prisma.ayat.findMany({
+  const ayats = await getAyatsToLearn();
+  const session = await getAuthSession();
+  const user = session ? await getUserData(session.user.id) : null;
+
+  return (
+    <div className="space-y-3">
+      {ayats.map((a) => (
+        <AyatCard
+          key={a.id}
+          ayat={a}
+          titreSourate={a.sourate.titre}
+          isFavorite={isAyatFavorite(a, user)}
+          isLearned={isAyatLearned(a, user)}
+        />
+      ))}
+    </div>
+  );
+}
+
+async function getAyatsToLearn() {
+  return await prisma.ayat.findMany({
     where: { toLearn: true },
     include: { sourate: true },
   });
+}
 
-  const session = await getAuthSession();
-  const user = await prisma.user.findFirst({
-    where: { id: session?.user.id },
-    include: { myAyats: true, myThemes: true, ayatsLearned: true },
+async function getUserData(userId: string) {
+  return await prisma.user.findFirst({
+    where: { id: userId },
+    include: { myAyats: true, ayatsLearned: true },
   });
-  const isAyatFavorite = (ayat: ayat) => {
-    if (!session) return false;
-    if (user) return user.myAyats.some((a) => a.id === ayat.id);
-    return false;
-  };
+}
 
-  const isAyatLearned = (ayat: ayat) => {
-    if (!session) return false;
-    if (user) return user.ayatsLearned.some((a) => a.id === ayat.id);
-    return false;
-  };
+function isAyatFavorite(ayat: ayat, user: any) {
+  return user ? user.myAyats.some((a: ayat) => a.id === ayat.id) : false;
+}
 
-  return ayats.map((a) => (
-    <AyatCard
-      ayat={a}
-      isFavorite={isAyatFavorite(a)}
-      titreSourate={a.sourate.titre}
-      key={a.id}
-      isLearned={isAyatLearned(a)}
-    />
-  ));
+function isAyatLearned(ayat: ayat, user: any) {
+  return user ? user.ayatsLearned.some((a: ayat) => a.id === ayat.id) : false;
 }

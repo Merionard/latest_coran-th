@@ -23,86 +23,60 @@ export default async function ViewTheme({
 }: {
   params: { themeCoranId: string };
 }) {
-  const theme = await prisma.theme.findUnique({
-    where: { id: Number(params.themeCoranId) },
-    include: {
-      ayats: {
-        include: { sourate: true },
-        orderBy: [{ sourate_number: "asc" }, { number: "asc" }],
+  const [theme, allOtherThemes, session, books] = await Promise.all([
+    prisma.theme.findUnique({
+      where: { id: Number(params.themeCoranId) },
+      include: {
+        ayats: {
+          include: { sourate: true },
+          orderBy: [{ sourate_number: "asc" }, { number: "asc" }],
+        },
+        hadiths: true,
+        subThemes: true,
       },
-      hadiths: true,
-      subThemes: true,
-    },
-  });
-  const allOtherThemes = await prisma.theme.findMany({
-    where: { NOT: { id: Number(params.themeCoranId) } },
-  });
+    }),
+    prisma.theme.findMany({
+      where: { NOT: { id: Number(params.themeCoranId) } },
+    }),
+    getAuthSession(),
+    prisma.hadithBook.findMany({
+      select: { id: true, title: true },
+    }),
+  ]);
 
-  if (theme === null) {
+  if (!theme) {
     throw new Error("Ce thème n'existe pas!");
   }
 
-  const session = await getAuthSession();
-  const user = await prisma.user.findFirst({
-    where: { id: session?.user.id },
-    include: {
-      myAyats: true,
-      myThemes: true,
-      ayatsLearned: true,
-      myHadiths: true,
-      hadithsLearned: true,
-    },
-  });
+  const user = session
+    ? await prisma.user.findFirst({
+        where: { id: session.user.id },
+        include: {
+          myAyats: true,
+          myThemes: true,
+          ayatsLearned: true,
+          myHadiths: true,
+          hadithsLearned: true,
+        },
+      })
+    : null;
 
-  let books: any[] = [];
-  if (session) {
-    books = await prisma.hadithBook.findMany({
-      select: { id: true, title: true },
-    });
-  }
-
-  const isAyatFavorite = (ayat: ayat) => {
-    if (!session) return false;
-    if (user) return user.myAyats.some((a) => a.id === ayat.id);
-    return false;
-  };
-
-  const isAyatLearned = (ayat: ayat) => {
-    if (!session) return false;
-    if (user) return user.ayatsLearned.some((a) => a.id === ayat.id);
-    return false;
-  };
-
-  const isThemeFavorite = () => {
-    if (!session) return false;
-    if (user) {
-      return user.myThemes.some((t) => t.id === theme.id);
-    }
-    return false;
-  };
-  const isHadithFavorite = (hadith: hadith) => {
-    if (!session) return false;
-    if (user) {
-      return user.myHadiths.some((h) => h.id === hadith.id);
-    }
-    return false;
-  };
-  const isHadithLearned = (hadith: hadith) => {
-    if (!session) return false;
-    if (user) {
-      return user.hadithsLearned.some((h) => h.id === hadith.id);
-    }
-    return false;
-  };
-
-  console.log("test2222");
+  const isAyatFavorite = (ayat: ayat) =>
+    user?.myAyats.some((a) => a.id === ayat.id) || false;
+  const isAyatLearned = (ayat: ayat) =>
+    user?.ayatsLearned.some((a) => a.id === ayat.id) || false;
+  const isThemeFavorite = () =>
+    user?.myThemes.some((t) => t.id === theme.id) || false;
+  const isHadithFavorite = (hadith: hadith) =>
+    user?.myHadiths.some((h) => h.id === hadith.id) || false;
+  const isHadithLearned = (hadith: hadith) =>
+    user?.hadithsLearned.some((h) => h.id === hadith.id) || false;
 
   const getAyatContent = () => {
     if (!session && theme.subThemes.length === 0 && theme.ayats.length === 0) {
       return (
         <Alert>
           <MessageCircleWarning className="h-4 w-4" />
-
           <AlertTitle>Oups</AlertTitle>
           <AlertDescription>
             Ce thème n&apos; pas encore de Ayats associées!
@@ -114,7 +88,7 @@ export default async function ViewTheme({
     return (
       <div className="space-y-5">
         <div>
-          {session && session.user.role === "ADMIN" && (
+          {session?.user.role === "ADMIN" && (
             <div className="m-auto w-3/4 my-5 md:my-16">
               <ThemeSearchAyat themeId={Number(params.themeCoranId)} />
             </div>
@@ -125,8 +99,8 @@ export default async function ViewTheme({
             </div>
           )}
           <h3 className="text-center text-4xl my-3">Ayats</h3>
-          <div className="space-y-5 pt-5  p-3 md:p-6">
-            {theme?.ayats.map((a) => (
+          <div className="space-y-5 pt-5 p-3 md:p-6">
+            {theme.ayats.map((a) => (
               <AyatCard
                 key={a.id}
                 ayat={a}
@@ -143,30 +117,25 @@ export default async function ViewTheme({
   };
 
   const getSubThemeContent = () => {
-    if (theme && theme.subThemes) {
+    if (theme.subThemes.length > 0) {
       return (
-        theme.subThemes.length > 0 && (
-          <div>
-            {theme.ayats.length > 0 && (
-              <hr className="mx-auto w-3/4 border-2 border-black" />
-            )}
-            <h3 className="text-center text-4xl my-3">Sous thèmes</h3>
-            {theme?.subThemes.map((subTheme) => (
-              <Link
-                href={`/themes_coran/${subTheme.id}`}
-                key={subTheme.id}
-                className="active:bg-primary"
-              >
-                <div
-                  className="p-5 border mb-3 transition ease-in-out delay-150 hover:scale-110 duration-300 cursor-pointer text-center text-xl 
-          bg-card"
-                >
-                  {subTheme.name}
-                </div>
-              </Link>
-            ))}
-          </div>
-        )
+        <div>
+          {theme.ayats.length > 0 && (
+            <hr className="mx-auto w-3/4 border-2 border-black" />
+          )}
+          <h3 className="text-center text-4xl my-3">Sous thèmes</h3>
+          {theme.subThemes.map((subTheme) => (
+            <Link
+              href={`/themes_coran/${subTheme.id}`}
+              key={subTheme.id}
+              className="active:bg-primary"
+            >
+              <div className="p-5 border mb-3 transition ease-in-out delay-150 hover:scale-110 duration-300 cursor-pointer text-center text-xl bg-card">
+                {subTheme.name}
+              </div>
+            </Link>
+          ))}
+        </div>
       );
     }
   };
@@ -174,13 +143,8 @@ export default async function ViewTheme({
   return (
     <div>
       <h2 className="text-4xl md:text-6xl text-center">{theme?.name}</h2>
-      <div className="flex justify-end gap-2 mt-10 mb-2 ">
-        <Button
-          asChild
-          variant={"outline"}
-          size={"icon"}
-          className="rounded-full"
-        >
+      <div className="flex justify-end gap-2 mt-10 mb-2">
+        <Button asChild variant="outline" size="icon" className="rounded-full">
           <Link
             href={
               theme?.parentId !== null
@@ -196,7 +160,7 @@ export default async function ViewTheme({
           handleClick={toogleFavoriteTheme}
           id={theme.id}
         />
-        {session && session.user.role === "ADMIN" && (
+        {session?.user.role === "ADMIN" && (
           <>
             <ThemeDialogForm
               onSubmitForm={updateTheme}
@@ -213,25 +177,25 @@ export default async function ViewTheme({
         )}
       </div>
       {getAyatContent()}
-
       <div>
         <h4 className="text-center text-4xl my-3">Hadiths</h4>
-        <div className="m-auto w-3/4 my-5 md:my-16">
-          <SearchHadith books={books} themeId={theme.id} />
-        </div>
+        {session && (
+          <div className="m-auto w-3/4 my-5 md:my-16 hidden md:block">
+            <SearchHadith books={books} themeId={theme.id} />
+          </div>
+        )}
         <div className="space-y-5">
           {theme.hadiths.map((h) => (
             <HadithItem
+              key={h.id}
               hadith={h}
               isFavorite={isHadithFavorite(h)}
               isLearned={isHadithLearned(h)}
-              key={h.id}
               themeId={theme.id}
             />
           ))}
         </div>
       </div>
-
       {getSubThemeContent()}
     </div>
   );
