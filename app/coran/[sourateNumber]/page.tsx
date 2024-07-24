@@ -3,9 +3,6 @@ import { CardContent } from "@/components/ui/card";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/prisma/client";
 import { ayat } from "@prisma/client";
-import { Noto_Sans_Arabic } from "next/font/google";
-
-const note = Noto_Sans_Arabic({ weight: "400", subsets: ["arabic"] });
 
 export default async function SouratePage({
   params,

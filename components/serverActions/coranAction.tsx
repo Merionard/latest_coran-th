@@ -1,5 +1,6 @@
 "use server";
 
+import { cleanTashkeel } from "@/lib/utils";
 import { prisma } from "@/prisma/client";
 import { ayat } from "@prisma/client";
 
@@ -12,10 +13,8 @@ export const searchAyats = async (
   page: number,
   pageSize: number
 ) => {
-  const cleanedWord = search.replace(
-    /[\u064B-\u065F\u0670\u06D6-\u06ED\u0671]/g,
-    ""
-  );
+  const cleanedWord = search;
+
   console.log(cleanedWord);
 
   const offset = (page - 1) * pageSize;
@@ -25,7 +24,7 @@ export const searchAyats = async (
       SELECT a.*, s.titre
       FROM "ayat" a
       JOIN "sourate" s ON a.sourate_number = s.number
-      WHERE REGEXP_REPLACE(a."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671]', '', 'g')
+      WHERE REGEXP_REPLACE(a."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
       ILIKE ${"%" + cleanedWord + "%"}
       ORDER BY s.number, a.number
       LIMIT ${pageSize}
@@ -35,7 +34,7 @@ export const searchAyats = async (
       SELECT COUNT(*) as totalcount
       FROM "ayat" a
       JOIN "sourate" s ON a.sourate_number = s.number
-      WHERE REGEXP_REPLACE(a."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671]', '', 'g')
+      WHERE REGEXP_REPLACE(a."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
       ILIKE ${"%" + cleanedWord + "%"}
     `,
   ]);

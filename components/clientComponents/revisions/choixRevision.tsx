@@ -1,11 +1,11 @@
 "use client";
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ayat, hadith } from "@prisma/client";
+import { RocketIcon } from "lucide-react";
 import { useState } from "react";
 import { ExoCaroussel } from "./exoCaroussel";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { RocketIcon } from "lucide-react";
 
 type props = {
   myAyats: ayat[];

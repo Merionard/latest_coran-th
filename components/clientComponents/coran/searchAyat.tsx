@@ -6,8 +6,9 @@ import {
 } from "@/components/serverActions/coranAction";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/searchInput";
+import { cleanTashkeel } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 type props = {
   ifSomeSearch: (is: boolean) => void;
@@ -66,8 +67,8 @@ export const SearchAyat = ({ ifSomeSearch }: props) => {
       return <>{text}</>;
     }
     const harakats = /[\u064B-\u065F\u0670\u06D6-\u06ED\u0671]/g;
-    const textWithoutHarakat = text.replace(harakats, "");
-    const searhWithoutHarakats = searchTerm.replace(harakats, "");
+    const textWithoutHarakat = cleanTashkeel(text);
+    const searhWithoutHarakats = cleanTashkeel(searchTerm);
 
     const regex = new RegExp(`(${searhWithoutHarakats})`, "gi");
     const parts = textWithoutHarakat.split(regex);

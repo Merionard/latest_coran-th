@@ -27,7 +27,7 @@ export const AyatCoran = ({ ayat, isFavorite }: props) => {
     }
   };
   return (
-    <div className="border-b-2 space-y-3 bg-card">
+    <div className="border-b-2 space-y-3 bg-card p-3">
       <div className="flex justify-between">
         <div className="rounded-full border  flex items-center justify-center w-4 h-4 p-4">
           {ayat.number}
