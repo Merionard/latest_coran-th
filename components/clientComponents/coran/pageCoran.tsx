@@ -26,6 +26,18 @@ export const PageCoran = ({ sourateWhithAyat }: props) => {
     setSourateSelected(null);
     setSelectedAyatId(null);
   };
+  const handleLinkClick = (
+    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+    sourateNumber: number
+  ) => {
+    // Vérifiez si une sourate ou ayat est sélectionnée
+    if (sourateSelected || selectedAyatId) {
+      // Empêchez l'action par défaut du lien
+      event.preventDefault();
+      // Vous pouvez afficher un message ou effectuer une autre action ici
+      console.log("Lien désactivé, une sourate ou ayat est déjà sélectionnée.");
+    }
+  };
   return (
     <div>
       <SearchAyat ifSomeSearch={setIsSomeSearch} />
@@ -80,6 +92,7 @@ export const PageCoran = ({ sourateWhithAyat }: props) => {
             href={`coran/${s.number}`}
             key={s.number}
             className="block mb-3"
+            onClick={(event) => handleLinkClick(event, s.number)}
           >
             <Card className="flex justify-center items-center gap-5 transition  delay-150 ease-in-out  hover:scale-105 hover:bg-primary duration-300">
               <div className="flex flex-col justify-center items-center py-3 text-3xl">
