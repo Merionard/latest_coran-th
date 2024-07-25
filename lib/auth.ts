@@ -17,9 +17,9 @@ export const getAuthSession = async (
 ) => {
   const cacheKey = parameters.join(":");
 
-  if (sessionCache[cacheKey]) {
+  /*   if (sessionCache[cacheKey]) {
     return sessionCache[cacheKey];
-  }
+  } */
   const session = await getServerSession(...parameters, authOptions);
   sessionCache[cacheKey] = session;
   setTimeout(() => {
