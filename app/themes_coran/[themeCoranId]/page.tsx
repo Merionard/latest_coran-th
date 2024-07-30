@@ -15,8 +15,8 @@ import {
   updateTheme,
 } from "../../../components/serverActions/themeCoranAction";
 import ThemeSearchAyat from "../../../components/serverComponents/ThemeSearchAyat";
-import { SearchHadith } from "@/components/clientComponents/hadith/searchHadith";
 import { HadithItem } from "@/components/clientComponents/hadith/hadithItem";
+import { SelectHadith } from "@/components/clientComponents/hadith/selectHadith";
 
 export default async function ViewTheme({
   params,
@@ -181,7 +181,7 @@ export default async function ViewTheme({
         <h4 className="text-center text-4xl my-3">Hadiths</h4>
         {session && (
           <div className="m-auto w-3/4 my-5 md:my-16 hidden md:block">
-            <SearchHadith books={books} themeId={theme.id} />
+            <SelectHadith books={books} themeId={theme.id} />
           </div>
         )}
         <div className="space-y-5">
