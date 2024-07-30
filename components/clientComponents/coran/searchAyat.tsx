@@ -144,6 +144,28 @@ export const SearchAyat = ({ ifSomeSearch }: props) => {
     setSearch(value);
   };
 
+  const hitlightSearchTrad = (search: string, traduction: string | null) => {
+    if (!traduction) {
+      return "";
+    }
+    const regex = new RegExp(`(${search})`, "gi");
+    const parts = traduction.split(regex);
+
+    return (
+      <>
+        {parts.map((part, index) =>
+          regex.test(part) ? (
+            <span key={index} className="bg-yellow-400">
+              {part}
+            </span>
+          ) : (
+            part
+          )
+        )}
+      </>
+    );
+  };
+
   return (
     <div>
       <div className="flex justify-end gap-2">
@@ -187,7 +209,7 @@ export const SearchAyat = ({ ifSomeSearch }: props) => {
             <p className="text-2xl text-right">
               {highlightSearchTerm(a.content, search)}
             </p>
-            <p>{a.traduction}</p>
+            <p>{hitlightSearchTrad(search, a.traduction)}</p>
           </div>
         ))}
       </div>

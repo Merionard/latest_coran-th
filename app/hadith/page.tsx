@@ -1,3 +1,4 @@
+import { SearchHadith } from "@/components/clientComponents/hadith/searchHadith";
 import {
   Card,
   CardDescription,
@@ -38,8 +39,12 @@ export default async function ThemesHadithsPage() {
       b.titleTraductionEn === "Riyad as-Salihin" ||
       b.titleTraductionEn === "Shama'il Muhammadiyah"
   );
+
+  const test = (is: boolean) => null;
+
   return (
     <div className="space-y-10">
+      <SearchHadith />
       <h2 className="text-center text-4xl md:text-6xl mb-10">
         Ouvrages du hadith
       </h2>
