@@ -1,18 +1,13 @@
 "use client";
 
 import {
-  AyatWithTitre,
-  searchAyats,
-} from "@/components/serverActions/coranAction";
-import {
-  HadithSearch,
   FirstSearchHadiths,
+  HadithSearch,
   searchHadiths,
 } from "@/components/serverActions/hadithAction";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/searchInput";
 import { cleanTashkeel } from "@/lib/utils";
-import { hadith } from "@prisma/client";
 import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
 import { useState } from "react";
 

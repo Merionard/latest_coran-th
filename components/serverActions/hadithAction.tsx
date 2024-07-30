@@ -141,7 +141,7 @@ export const FirstSearchHadiths = async (
       JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
       WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
       ILIKE ${"%" + cleanedWord + "%"}
-      OR h."traductionFr" like ${"%" + cleanedWord + "%"}
+      OR h."traductionFr" ILIKE ${"%" + cleanedWord + "%"}
       LIMIT ${pageSize}
       OFFSET ${offset}
     `,
@@ -152,10 +152,11 @@ export const FirstSearchHadiths = async (
       JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
       WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
       ILIKE ${"%" + cleanedWord + "%"}
-      OR h."traductionFr" like ${"%" + cleanedWord + "%"}
+      OR h."traductionFr" ILIKE  ${"%" + cleanedWord + "%"}
     `,
   ]);
-
+  //@ts-ignore
+  console.log("nombre enregistrement " + Number(totalcount[0].totalcount));
   return {
     ayats: result,
     //@ts-ignore
@@ -168,7 +169,7 @@ export const searchHadiths = async (
   page: number,
   pageSize: number
 ) => {
-  const cleanedWord = cleanTashkeel(search);
+  const cleanedWord = cleanTashkeel(search).toUpperCase();
 
   const offset = (page - 1) * pageSize;
 
@@ -180,7 +181,7 @@ export const searchHadiths = async (
       JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
       WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
       ILIKE ${"%" + cleanedWord + "%"}
-      OR h."traductionFr" like ${"%" + cleanedWord + "%"}
+      OR h."traductionFr" ILIKE  ${"%" + cleanedWord + "%"}
       LIMIT ${pageSize}
       OFFSET ${offset}
     `,

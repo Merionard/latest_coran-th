@@ -25,7 +25,7 @@ export const searchAyats = async (
       JOIN "sourate" s ON a.sourate_number = s.number
       WHERE REGEXP_REPLACE(a."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
       ILIKE ${"%" + cleanedWord + "%"}
-      OR a.traduction like ${"%" + cleanedWord + "%"}
+      OR a.traduction ILIKE  ${"%" + cleanedWord + "%"}
       ORDER BY s.number, a.number
       LIMIT ${pageSize}
       OFFSET ${offset}
@@ -36,7 +36,7 @@ export const searchAyats = async (
       JOIN "sourate" s ON a.sourate_number = s.number
       WHERE REGEXP_REPLACE(a."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
       ILIKE ${"%" + cleanedWord + "%"}
-      OR a.traduction like ${"%" + cleanedWord + "%"}
+      OR a.traduction ILIKE  ${"%" + cleanedWord + "%"}
     `,
   ]);
 
