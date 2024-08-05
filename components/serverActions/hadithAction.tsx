@@ -1,9 +1,7 @@
 "use server";
 
 import { getAuthSession } from "@/lib/auth";
-import { cleanTashkeel } from "@/lib/utils";
 import { prisma } from "@/prisma/client";
-import { hadith } from "@prisma/client";
 
 export const addFavoriteHadith = async (hadithId: number) => {
   const session = await getAuthSession();
@@ -129,8 +127,6 @@ export const FirstSearchHadiths = async (
   page: number,
   pageSize: number
 ) => {
-  const cleanedWord = cleanTashkeel(search);
-
   const offset = (page - 1) * pageSize;
 
   const [result, totalcount] = await prisma.$transaction([
@@ -140,8 +136,8 @@ export const FirstSearchHadiths = async (
       JOIN  "hadithChapter" hc on hc.id = h.hadith_chapter 
       JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
       WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
-      ILIKE ${"%" + cleanedWord + "%"}
-      OR h."traductionFr" ILIKE ${"%" + cleanedWord + "%"}
+      ILIKE ${"%" + search + "%"}
+      OR h."traductionFr" ILIKE ${"%" + search + "%"}
       LIMIT ${pageSize}
       OFFSET ${offset}
     `,
@@ -151,8 +147,8 @@ export const FirstSearchHadiths = async (
       JOIN  "hadithChapter" hc on hc.id = h.hadith_chapter 
       JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
       WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
-      ILIKE ${"%" + cleanedWord + "%"}
-      OR h."traductionFr" ILIKE  ${"%" + cleanedWord + "%"}
+      ILIKE ${"%" + search + "%"}
+      OR h."traductionFr" ILIKE  ${"%" + search + "%"}
     `,
   ]);
   //@ts-ignore
@@ -169,8 +165,6 @@ export const searchHadiths = async (
   page: number,
   pageSize: number
 ) => {
-  const cleanedWord = cleanTashkeel(search).toUpperCase();
-
   const offset = (page - 1) * pageSize;
 
   const [result] = await prisma.$transaction([
@@ -180,8 +174,8 @@ export const searchHadiths = async (
       JOIN  "hadithChapter" hc on hc.id = h.hadith_chapter 
       JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
       WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
-      ILIKE ${"%" + cleanedWord + "%"}
-      OR h."traductionFr" ILIKE  ${"%" + cleanedWord + "%"}
+      ILIKE ${"%" + search + "%"}
+      OR h."traductionFr" ILIKE  ${"%" + search + "%"}
       LIMIT ${pageSize}
       OFFSET ${offset}
     `,

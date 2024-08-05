@@ -43,7 +43,7 @@ export const SelectHadith = ({ books, themeId }: props) => {
 
     const fetchedHadiths = await fetchHadithByBookId(
       bookId,
-      (page ?? 1 - 1) * 200
+      (page ? page - 1 : 0) * 200
     );
     setHadithByBook((prevState) => ({
       ...prevState,
