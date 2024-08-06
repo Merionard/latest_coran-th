@@ -23,7 +23,9 @@ export default async function ViewTheme({
 }: {
   params: { themeCoranId: string };
 }) {
-  const [theme, allOtherThemes, session, books] = await Promise.all([
+  const session = await getAuthSession();
+
+  const [theme] = await Promise.all([
     prisma.theme.findUnique({
       where: { id: Number(params.themeCoranId) },
       include: {
@@ -34,13 +36,6 @@ export default async function ViewTheme({
         hadiths: true,
         subThemes: true,
       },
-    }),
-    prisma.theme.findMany({
-      where: { NOT: { id: Number(params.themeCoranId) } },
-    }),
-    getAuthSession(),
-    prisma.hadithBook.findMany({
-      select: { id: true, title: true },
     }),
   ]);
 
@@ -98,19 +93,23 @@ export default async function ViewTheme({
               <p>{theme.description}</p>
             </div>
           )}
-          <h3 className="text-center text-4xl my-3">Ayats</h3>
-          <div className="space-y-5 pt-5 p-3 md:p-6">
-            {theme.ayats.map((a) => (
-              <AyatCard
-                key={a.id}
-                ayat={a}
-                titreSourate={a.sourate.titre}
-                themeId={theme.id}
-                isFavorite={isAyatFavorite(a)}
-                isLearned={isAyatLearned(a)}
-              />
-            ))}
-          </div>
+          {theme.ayats.length > 0 && (
+            <div className="mt-10">
+              <h3 className="text-2xl mb-3">1. Ayats</h3>
+              <div className="space-y-5 ">
+                {theme.ayats.map((a) => (
+                  <AyatCard
+                    key={a.id}
+                    ayat={a}
+                    titreSourate={a.sourate.titre}
+                    themeId={theme.id}
+                    isFavorite={isAyatFavorite(a)}
+                    isLearned={isAyatLearned(a)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -140,9 +139,73 @@ export default async function ViewTheme({
     }
   };
 
+  if (session?.user.role === "ADMIN") {
+    const [allOtherThemes, books] = await Promise.all([
+      prisma.theme.findMany({
+        where: { NOT: { id: Number(params.themeCoranId) } },
+      }),
+
+      prisma.hadithBook.findMany({
+        select: { id: true, title: true },
+      }),
+    ]);
+    return (
+      <div>
+        <h2 className="text-4xl md:text-6xl text-center text-primary">
+          {theme?.name}
+        </h2>
+        <div className="flex justify-end gap-2 mt-10 mb-2">
+          <Button
+            asChild
+            variant="outline"
+            size="icon"
+            className="rounded-full"
+          >
+            <Link
+              href={
+                theme?.parentId !== null
+                  ? `/themes_coran/${theme?.parentId}`
+                  : "/themes_coran/"
+              }
+            >
+              <Undo2 />
+            </Link>
+          </Button>
+          <FavorisBtn
+            isFavorite={isThemeFavorite()}
+            handleClick={toogleFavoriteTheme}
+            id={theme.id}
+          />
+          <>
+            <ThemeDialogForm
+              onSubmitForm={updateTheme}
+              parentId={Number(params.themeCoranId)}
+              theme={theme}
+              parentThemes={allOtherThemes}
+            />
+            <ThemeDialogForm
+              onSubmitForm={createNewThemeCoran}
+              parentId={Number(params.themeCoranId)}
+            />
+            <DeleteThemeBtn themeId={theme.id} />
+          </>
+        </div>
+        {getAyatContent()}
+        <div>
+          <h4 className="text-2xl mt-5 mb-3">2. Hadiths</h4>
+          <div className="m-auto w-3/4 my-5 md:my-16 hidden md:block">
+            <SelectHadith books={books} themeId={theme.id} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <h2 className="text-4xl md:text-6xl text-center">{theme?.name}</h2>
+      <h2 className="text-4xl md:text-6xl text-center text-primary">
+        {theme?.name}
+      </h2>
       <div className="flex justify-end gap-2 mt-10 mb-2">
         <Button asChild variant="outline" size="icon" className="rounded-full">
           <Link
@@ -160,41 +223,25 @@ export default async function ViewTheme({
           handleClick={toogleFavoriteTheme}
           id={theme.id}
         />
-        {session?.user.role === "ADMIN" && (
-          <>
-            <ThemeDialogForm
-              onSubmitForm={updateTheme}
-              parentId={Number(params.themeCoranId)}
-              theme={theme}
-              parentThemes={allOtherThemes}
-            />
-            <ThemeDialogForm
-              onSubmitForm={createNewThemeCoran}
-              parentId={Number(params.themeCoranId)}
-            />
-            <DeleteThemeBtn themeId={theme.id} />
-          </>
-        )}
       </div>
       {getAyatContent()}
       <div>
-        <h4 className="text-center text-4xl my-3">Hadiths</h4>
-        {session && (
-          <div className="m-auto w-3/4 my-5 md:my-16 hidden md:block">
-            <SelectHadith books={books} themeId={theme.id} />
-          </div>
+        {theme.hadiths.length > 0 && (
+          <>
+            <h4 className="text-2xl mt-5 mb-3">2. Hadiths</h4>
+            <div className="space-y-5">
+              {theme.hadiths.map((h) => (
+                <HadithItem
+                  key={h.id}
+                  hadith={h}
+                  isFavorite={isHadithFavorite(h)}
+                  isLearned={isHadithLearned(h)}
+                  themeId={theme.id}
+                />
+              ))}
+            </div>
+          </>
         )}
-        <div className="space-y-5">
-          {theme.hadiths.map((h) => (
-            <HadithItem
-              key={h.id}
-              hadith={h}
-              isFavorite={isHadithFavorite(h)}
-              isLearned={isHadithLearned(h)}
-              themeId={theme.id}
-            />
-          ))}
-        </div>
       </div>
       {getSubThemeContent()}
     </div>
