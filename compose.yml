@@ -1,0 +1,13 @@
+services:
+  coran-themes:
+    container_name: coran-themes
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      DATABASE_URL: ${DATABASE_URL}

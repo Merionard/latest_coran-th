@@ -144,6 +144,31 @@ export default async function ViewTheme({
     }
   };
 
+  const getHierarchy = async (parentId: number | null) => {
+    const breadcrumbs = [];
+
+    while (parentId) {
+      const parent = await prisma.theme.findUnique({ where: { id: parentId } });
+      if (parent) {
+        breadcrumbs.unshift(
+          <>
+            <BreadcrumbItem key={parent.id} className="md:text-xl">
+              <BreadcrumbLink asChild>
+                <Link href={`/themes_coran/${parent.id}`}>{parent.name}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+          </>
+        );
+        parentId = parent.parentId;
+      } else {
+        break;
+      }
+    }
+
+    return breadcrumbs;
+  };
+
   if (session?.user.role === "ADMIN") {
     const [allOtherThemes, books] = await Promise.all([
       prisma.theme.findMany({
@@ -156,6 +181,18 @@ export default async function ViewTheme({
     ]);
     return (
       <div>
+        <div className="flex justify-center mb-10">
+          {theme.parentId && (
+            <Breadcrumb>
+              <BreadcrumbList>
+                {getHierarchy(theme.parentId)}
+                <BreadcrumbItem className="md:text-xl">
+                  <BreadcrumbPage>{theme.name}</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
+          )}
+        </div>
         <h2 className="text-4xl md:text-6xl text-center text-primary">
           {theme?.name}
         </h2>
@@ -217,31 +254,6 @@ export default async function ViewTheme({
       </div>
     );
   }
-
-  const getHierarchy = async (parentId: number | null) => {
-    const breadcrumbs = [];
-
-    while (parentId) {
-      const parent = await prisma.theme.findUnique({ where: { id: parentId } });
-      if (parent) {
-        breadcrumbs.unshift(
-          <>
-            <BreadcrumbItem key={parent.id} className="md:text-xl">
-              <BreadcrumbLink asChild>
-                <Link href={`/themes_coran/${parent.id}`}>{parent.name}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-          </>
-        );
-        parentId = parent.parentId;
-      } else {
-        break;
-      }
-    }
-
-    return breadcrumbs;
-  };
 
   return (
     <div>
