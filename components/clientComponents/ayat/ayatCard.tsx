@@ -65,7 +65,7 @@ export const AyatCard = (props: {
     <div className="p-5 border bg-card">
       <div className="flex justify-between items-center mb-3">
         <h3 className="text-xl font-bold">
-          Sourate {props.ayat.sourate_number} verset {props.ayat.number}{" "}
+          s.{props.ayat.sourate_number}/v.{props.ayat.number}{" "}
           <span>{props.titreSourate}</span>
         </h3>
         <div className="flex gap-2">

@@ -95,7 +95,7 @@ export default async function ViewTheme({
           )}
           {theme.ayats.length > 0 && (
             <div className="mt-10">
-              <h3 className="text-2xl mb-3">1. Ayats</h3>
+              <h3 className="text-2xl mb-3 underline">- Ayats</h3>
               <div className="space-y-5 ">
                 {theme.ayats.map((a) => (
                   <AyatCard
@@ -119,10 +119,7 @@ export default async function ViewTheme({
     if (theme.subThemes.length > 0) {
       return (
         <div>
-          {theme.ayats.length > 0 && (
-            <hr className="mx-auto w-3/4 border-2 border-black" />
-          )}
-          <h3 className="text-center text-4xl my-3">Sous thèmes</h3>
+          <h3 className="text-2xl mt-5 mb-3 underline">- Sous thèmes</h3>
           {theme.subThemes.map((subTheme) => (
             <Link
               href={`/themes_coran/${subTheme.id}`}
@@ -192,11 +189,23 @@ export default async function ViewTheme({
         </div>
         {getAyatContent()}
         <div>
-          <h4 className="text-2xl mt-5 mb-3">2. Hadiths</h4>
+          <h4 className="text-2xl mt-5 mb-3 underline">- Hadiths</h4>
           <div className="m-auto w-3/4 my-5 md:my-16 hidden md:block">
             <SelectHadith books={books} themeId={theme.id} />
           </div>
+          <div className="space-y-5">
+            {theme.hadiths.map((h) => (
+              <HadithItem
+                key={h.id}
+                hadith={h}
+                isFavorite={isHadithFavorite(h)}
+                isLearned={isHadithLearned(h)}
+                themeId={theme.id}
+              />
+            ))}
+          </div>
         </div>
+        {getSubThemeContent()}
       </div>
     );
   }
@@ -228,7 +237,7 @@ export default async function ViewTheme({
       <div>
         {theme.hadiths.length > 0 && (
           <>
-            <h4 className="text-2xl mt-5 mb-3">2. Hadiths</h4>
+            <h4 className="text-2xl mt-5 mb-3 underline">- Hadiths</h4>
             <div className="space-y-5">
               {theme.hadiths.map((h) => (
                 <HadithItem
