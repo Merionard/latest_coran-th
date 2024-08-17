@@ -25,6 +25,9 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Berkshire_Swash } from "next/font/google";
+
+const berkshire = Berkshire_Swash({ weight: "400", subsets: ["latin"] });
 
 export default async function ViewTheme({
   params,
@@ -97,13 +100,23 @@ export default async function ViewTheme({
             </div>
           )}
           {theme.description && (
-            <div className="border p-3 md:p-10 md:w-2/3 mx-auto border-black">
+            <div
+              className="border p-3 md:p-8
+              border-black bg-[#f2c166]"
+            >
               <p>{theme.description}</p>
             </div>
           )}
           {theme.ayats.length > 0 && (
             <div className="mt-10">
-              <h3 className="text-2xl mb-3 underline">Ayats</h3>
+              <h3
+                className={
+                  berkshire.className +
+                  " text-4xl mb-3 text-center text-orange-400 "
+                }
+              >
+                Versets
+              </h3>
               <div className="space-y-5 ">
                 {theme.ayats.map((a) => (
                   <AyatCard
@@ -127,18 +140,18 @@ export default async function ViewTheme({
     if (theme.subThemes.length > 0) {
       return (
         <div>
-          <h3 className="text-2xl mt-5 mb-3 underline">Sous thèmes</h3>
-          {theme.subThemes.map((subTheme) => (
-            <Link
-              href={`/themes_coran/${subTheme.id}`}
-              key={subTheme.id}
-              className="active:bg-primary"
-            >
-              <div className="p-5 border mb-3 transition ease-in-out delay-150 hover:scale-110 duration-300 cursor-pointer text-center text-xl bg-card">
+          <h3 className="text-4xl mt-5 mb-3">Sous thèmes</h3>
+          <div className="flex flex-col">
+            {theme.subThemes.map((subTheme) => (
+              <Link
+                href={`/themes_coran/${subTheme.id}`}
+                key={subTheme.id}
+                className="text-primary active:text-black"
+              >
                 {subTheme.name}
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))}
+          </div>
         </div>
       );
     }
@@ -193,7 +206,12 @@ export default async function ViewTheme({
             </Breadcrumb>
           )}
         </div>
-        <h2 className="text-4xl md:text-6xl text-center text-primary">
+        <h2
+          className={
+            berkshire.className +
+            " text-4xl md:text-6xl text-center text-primary"
+          }
+        >
           {theme?.name}
         </h2>
         <div className="flex justify-end gap-2 mt-10 mb-2">
@@ -234,7 +252,14 @@ export default async function ViewTheme({
         </div>
         {getAyatContent()}
         <div>
-          <h4 className="text-2xl mt-5 mb-3 underline">Hadiths</h4>
+          <h4
+            className={
+              berkshire.className +
+              " text-4xl mt-5 mb-3 text-center text-orange-400 "
+            }
+          >
+            Hadiths
+          </h4>
           <div className="m-auto w-3/4 my-5 md:my-16 hidden md:block">
             <SelectHadith books={books} themeId={theme.id} />
           </div>
@@ -269,7 +294,11 @@ export default async function ViewTheme({
           </Breadcrumb>
         )}
       </div>
-      <h2 className="text-4xl md:text-6xl text-center text-primary">
+      <h2
+        className={
+          berkshire.className + " text-4xl md:text-6xl text-center text-primary"
+        }
+      >
         {theme?.name}
       </h2>
       <div className="flex justify-end gap-2 mt-10 mb-2">
@@ -294,7 +323,14 @@ export default async function ViewTheme({
       <div>
         {theme.hadiths.length > 0 && (
           <>
-            <h4 className="text-2xl mt-5 mb-3 underline">Hadiths</h4>
+            <h4
+              className={
+                berkshire.className +
+                " text-4xl mt-5 mb-3 text-center text-orange-400 "
+              }
+            >
+              Hadiths
+            </h4>
             <div className="space-y-5">
               {theme.hadiths.map((h) => (
                 <HadithItem
