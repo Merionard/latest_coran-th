@@ -198,7 +198,7 @@ export default async function ViewTheme({
     return (
       <div className="flex flex-grow gap-3">
         {getSubThemeContent()}
-        <div className="w-3/4 mx-auto">
+        <div className="md:w-3/4 mx-auto">
           <div className="flex justify-center mb-10">
             {theme.parentId && (
               <Breadcrumb>
@@ -288,7 +288,7 @@ export default async function ViewTheme({
   return (
     <div className="flex flex-grow gap-3 items-baseline">
       {getSubThemeContent()}
-      <div className="w-3/4 mx-auto">
+      <div className="md:w-3/4 mx-auto">
         <div className="flex justify-center mb-10 flex-1">
           {theme.parentId && (
             <Breadcrumb>
