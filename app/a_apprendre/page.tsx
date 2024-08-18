@@ -9,7 +9,7 @@ export default async function ToLearn() {
   const user = session ? await getUserData(session.user.id) : null;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 md:container">
       {ayats.map((a) => (
         <AyatCard
           key={a.id}

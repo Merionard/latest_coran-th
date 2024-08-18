@@ -23,7 +23,7 @@ export const ChoixRevision = ({
 }: props) => {
   const [ayats, setAyats] = useState<ayat[]>([]);
   return (
-    <div>
+    <div className="md:container">
       {ayats.length === 0 && (
         <Alert>
           <RocketIcon className="h-4 w-4" />

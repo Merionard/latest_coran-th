@@ -34,7 +34,7 @@ export const PageCoran = ({ sourateWhithAyat }: props) => {
     }
   };
   return (
-    <div>
+    <div className="md:container">
       <SearchAyat ifSomeSearch={setIsSomeSearch} />
       {!isSomeSearch && (
         <div className="flex mx-auto md:w-2/3 gap-3 mb-5">

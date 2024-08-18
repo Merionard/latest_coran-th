@@ -24,7 +24,7 @@ export default async function Themes() {
   ]);
 
   return (
-    <div>
+    <div className="md:container">
       <ListThemes themes={themes} admin={session?.user?.role === "ADMIN"} />
     </div>
   );

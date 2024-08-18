@@ -26,6 +26,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Berkshire_Swash } from "next/font/google";
+import { SousThemeList } from "@/components/clientComponents/theme/sousThemeList";
 
 const berkshire = Berkshire_Swash({ weight: "400", subsets: ["latin"] });
 
@@ -139,14 +140,16 @@ export default async function ViewTheme({
   const getSubThemeContent = () => {
     if (theme.subThemes.length > 0) {
       return (
-        <div>
-          <h3 className="text-4xl mt-5 mb-3">Sous thèmes</h3>
-          <div className="flex flex-col">
+        <div className="hidden md:block ">
+          <h3 className="text-4xl mt-5 mb-3 font-bold text-orange-500">
+            Sous thèmes
+          </h3>
+          <div className="flex flex-col gap-2">
             {theme.subThemes.map((subTheme) => (
               <Link
                 href={`/themes_coran/${subTheme.id}`}
                 key={subTheme.id}
-                className="text-primary active:text-black"
+                className="text-primary active:text-black p-2 border rounded-xl duration-300 cursor-pointer border-gray-600 hover:bg-primary hover:text-white"
               >
                 {subTheme.name}
               </Link>
@@ -193,8 +196,100 @@ export default async function ViewTheme({
       }),
     ]);
     return (
-      <div>
-        <div className="flex justify-center mb-10">
+      <div className="flex flex-grow gap-3">
+        {getSubThemeContent()}
+        <div className="w-3/4 mx-auto">
+          <div className="flex justify-center mb-10">
+            {theme.parentId && (
+              <Breadcrumb>
+                <BreadcrumbList>
+                  {getHierarchy(theme.parentId)}
+                  <BreadcrumbItem className="md:text-xl">
+                    <BreadcrumbPage>{theme.name}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </BreadcrumbList>
+              </Breadcrumb>
+            )}
+          </div>
+          <h2
+            className={
+              berkshire.className +
+              " text-4xl md:text-6xl text-center text-primary"
+            }
+          >
+            {theme?.name}
+          </h2>
+          <div className="flex justify-end gap-2 mt-10 mb-2">
+            <Button
+              asChild
+              variant="outline"
+              size="icon"
+              className="rounded-full"
+            >
+              <Link
+                href={
+                  theme?.parentId !== null
+                    ? `/themes_coran/${theme?.parentId}`
+                    : "/themes_coran/"
+                }
+              >
+                <Undo2 />
+              </Link>
+            </Button>
+            <FavorisBtn
+              isFavorite={isThemeFavorite()}
+              handleClick={toogleFavoriteTheme}
+              id={theme.id}
+            />
+            <>
+              <ThemeDialogForm
+                onSubmitForm={updateTheme}
+                parentId={Number(params.themeCoranId)}
+                theme={theme}
+                parentThemes={allOtherThemes}
+              />
+              <ThemeDialogForm
+                onSubmitForm={createNewThemeCoran}
+                parentId={Number(params.themeCoranId)}
+              />
+              <DeleteThemeBtn themeId={theme.id} />
+            </>
+          </div>
+          {getAyatContent()}
+          <div>
+            <h4
+              className={
+                berkshire.className +
+                " text-4xl mt-5 mb-3 text-center text-orange-400 "
+              }
+            >
+              Hadiths
+            </h4>
+            <div className="m-auto w-3/4 my-5 md:my-16 hidden md:block">
+              <SelectHadith books={books} themeId={theme.id} />
+            </div>
+            <div className="space-y-5">
+              {theme.hadiths.map((h) => (
+                <HadithItem
+                  key={h.id}
+                  hadith={h}
+                  isFavorite={isHadithFavorite(h)}
+                  isLearned={isHadithLearned(h)}
+                  themeId={theme.id}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-grow gap-3 items-baseline">
+      {getSubThemeContent()}
+      <div className="w-3/4 mx-auto">
+        <div className="flex justify-center mb-10 flex-1">
           {theme.parentId && (
             <Breadcrumb>
               <BreadcrumbList>
@@ -214,138 +309,59 @@ export default async function ViewTheme({
         >
           {theme?.name}
         </h2>
-        <div className="flex justify-end gap-2 mt-10 mb-2">
-          <Button
-            asChild
-            variant="outline"
-            size="icon"
-            className="rounded-full"
-          >
-            <Link
-              href={
-                theme?.parentId !== null
-                  ? `/themes_coran/${theme?.parentId}`
-                  : "/themes_coran/"
-              }
+        <div className="flex justify-between gap-2 mt-10 mb-2">
+          <SousThemeList subThemes={theme.subThemes} />
+          <div>
+            <Button
+              asChild
+              variant="outline"
+              size="icon"
+              className="rounded-full"
             >
-              <Undo2 />
-            </Link>
-          </Button>
-          <FavorisBtn
-            isFavorite={isThemeFavorite()}
-            handleClick={toogleFavoriteTheme}
-            id={theme.id}
-          />
-          <>
-            <ThemeDialogForm
-              onSubmitForm={updateTheme}
-              parentId={Number(params.themeCoranId)}
-              theme={theme}
-              parentThemes={allOtherThemes}
+              <Link
+                href={
+                  theme?.parentId !== null
+                    ? `/themes_coran/${theme?.parentId}`
+                    : "/themes_coran/"
+                }
+              >
+                <Undo2 />
+              </Link>
+            </Button>
+            <FavorisBtn
+              isFavorite={isThemeFavorite()}
+              handleClick={toogleFavoriteTheme}
+              id={theme.id}
             />
-            <ThemeDialogForm
-              onSubmitForm={createNewThemeCoran}
-              parentId={Number(params.themeCoranId)}
-            />
-            <DeleteThemeBtn themeId={theme.id} />
-          </>
+          </div>
         </div>
         {getAyatContent()}
         <div>
-          <h4
-            className={
-              berkshire.className +
-              " text-4xl mt-5 mb-3 text-center text-orange-400 "
-            }
-          >
-            Hadiths
-          </h4>
-          <div className="m-auto w-3/4 my-5 md:my-16 hidden md:block">
-            <SelectHadith books={books} themeId={theme.id} />
-          </div>
-          <div className="space-y-5">
-            {theme.hadiths.map((h) => (
-              <HadithItem
-                key={h.id}
-                hadith={h}
-                isFavorite={isHadithFavorite(h)}
-                isLearned={isHadithLearned(h)}
-                themeId={theme.id}
-              />
-            ))}
-          </div>
+          {theme.hadiths.length > 0 && (
+            <>
+              <h4
+                className={
+                  berkshire.className +
+                  " text-4xl mt-5 mb-3 text-center text-orange-400 "
+                }
+              >
+                Hadiths
+              </h4>
+              <div className="space-y-5">
+                {theme.hadiths.map((h) => (
+                  <HadithItem
+                    key={h.id}
+                    hadith={h}
+                    isFavorite={isHadithFavorite(h)}
+                    isLearned={isHadithLearned(h)}
+                    themeId={theme.id}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
-        {getSubThemeContent()}
       </div>
-    );
-  }
-
-  return (
-    <div>
-      <div className="flex justify-center mb-10">
-        {theme.parentId && (
-          <Breadcrumb>
-            <BreadcrumbList>
-              {getHierarchy(theme.parentId)}
-              <BreadcrumbItem className="md:text-xl">
-                <BreadcrumbPage>{theme.name}</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-        )}
-      </div>
-      <h2
-        className={
-          berkshire.className + " text-4xl md:text-6xl text-center text-primary"
-        }
-      >
-        {theme?.name}
-      </h2>
-      <div className="flex justify-end gap-2 mt-10 mb-2">
-        <Button asChild variant="outline" size="icon" className="rounded-full">
-          <Link
-            href={
-              theme?.parentId !== null
-                ? `/themes_coran/${theme?.parentId}`
-                : "/themes_coran/"
-            }
-          >
-            <Undo2 />
-          </Link>
-        </Button>
-        <FavorisBtn
-          isFavorite={isThemeFavorite()}
-          handleClick={toogleFavoriteTheme}
-          id={theme.id}
-        />
-      </div>
-      {getAyatContent()}
-      <div>
-        {theme.hadiths.length > 0 && (
-          <>
-            <h4
-              className={
-                berkshire.className +
-                " text-4xl mt-5 mb-3 text-center text-orange-400 "
-              }
-            >
-              Hadiths
-            </h4>
-            <div className="space-y-5">
-              {theme.hadiths.map((h) => (
-                <HadithItem
-                  key={h.id}
-                  hadith={h}
-                  isFavorite={isHadithFavorite(h)}
-                  isLearned={isHadithLearned(h)}
-                  themeId={theme.id}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-      {getSubThemeContent()}
     </div>
   );
 }

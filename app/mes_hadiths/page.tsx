@@ -22,7 +22,7 @@ export default async function MesHadiths() {
   const data = await getUserData(session.user.id);
 
   return (
-    <div>
+    <div className="md:container">
       <h2 className="text-center text-4xl md:text-6xl mb-5 md:mb-16">
         Mes Hadiths
       </h2>

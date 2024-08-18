@@ -38,7 +38,7 @@ export default async function ChapterPage({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 md:container">
       <h2 className="text-center text-4xl  md:text-6xl ">
         {hadiths[0].hadithChapter.titleEn} - {hadiths[0].hadithChapter.title}
       </h2>

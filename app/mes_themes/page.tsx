@@ -27,7 +27,7 @@ export default async function MyThemes() {
   });
 
   return (
-    <div>
+    <div className="md:container">
       <h2 className="text-center text-4xl md:text-6xl mb-16">Mes thèmes</h2>
       {data && data.myThemes.length > 0 ? (
         data.myThemes.map((t) => (

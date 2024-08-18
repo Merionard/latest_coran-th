@@ -43,7 +43,7 @@ export default async function ThemesHadithsPage() {
   const test = (is: boolean) => null;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 md:container">
       <SearchHadith />
       <h2 className="text-center text-4xl md:text-6xl mb-10">
         Ouvrages du hadith

@@ -30,7 +30,7 @@ export default async function SouratePage({
   };
 
   return (
-    <div>
+    <div className="md:container">
       <h2 className={"text-4xl text-center"}>{ayats[0].sourate.titre}</h2>
       <h3 className={"text-4xl text-center mt-5"}>
         بِسۡمِ ٱللَّهِ ٱلرَّحۡمَٰنِ ٱلرَّحِيمِ

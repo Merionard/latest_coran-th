@@ -62,7 +62,7 @@ export default function RootLayout({
       <body className={inter.className + " "}>
         <Providers attribute="class" defaultTheme="light">
           <Navbar />
-          <main className="px-2 md:container my-5 md:my-20 ">{children}</main>
+          <main className="px-2  my-5 md:my-20 ">{children}</main>
           <Toaster />
         </Providers>
       </body>

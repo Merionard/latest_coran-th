@@ -28,7 +28,7 @@ export default async function MyAyats() {
   });
 
   return (
-    <div>
+    <div className="md:container">
       <h2 className="text-center text-4xl md:text-6xl mb-5 md:mb-16">
         Mes Ayats
       </h2>
