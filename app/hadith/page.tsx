@@ -45,11 +45,11 @@ export default async function ThemesHadithsPage() {
   return (
     <div className="space-y-10 md:container">
       <SearchHadith />
-      <h2 className="text-center text-4xl md:text-6xl mb-10">
+      <h2 className="text-center text-4xl md:text-6xl mb-10 text-primary">
         Ouvrages du hadith
       </h2>
       <div>
-        <h3 className="text-left text-2xl md:text-4xl mb-5">
+        <h3 className="text-left text-2xl md:text-4xl mb-5 text-orange-500">
           Les 9 classiques du hadith
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
@@ -72,7 +72,9 @@ export default async function ThemesHadithsPage() {
       </div>
       <hr className="mx-auto w-1/2 border-primary" />
       <div>
-        <h2 className="text-left text-2xl md:text-4xl mb-5">Les 40</h2>
+        <h2 className="text-left text-2xl md:text-4xl mb-5 text-orange-500">
+          Les 40
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
           {fourtys.map((b) => (
             <Link href={`/hadith/${b.id}`} key={b.id}>
@@ -93,7 +95,9 @@ export default async function ThemesHadithsPage() {
       </div>
       <hr className="mx-auto w-1/2 border-primary" />
       <div>
-        <h2 className="text-left text-2xl md:text-4xl mb-5">Autes ouvrages</h2>
+        <h2 className="text-left text-2xl md:text-4xl mb-5 text-orange-500">
+          Autes ouvrages
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
           {others.map((b) => (
             <Link href={`/hadith/${b.id}`} key={b.id}>

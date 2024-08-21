@@ -23,7 +23,7 @@ export default async function MesHadiths() {
 
   return (
     <div className="md:container">
-      <h2 className="text-center text-4xl md:text-6xl mb-5 md:mb-16">
+      <h2 className="text-center text-4xl md:text-6xl mb-5 md:mb-16 text-primary">
         Mes Hadiths
       </h2>
       <FavorisHadithPage hadithsUser={data} />

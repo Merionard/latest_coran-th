@@ -28,7 +28,9 @@ export default async function MyThemes() {
 
   return (
     <div className="md:container">
-      <h2 className="text-center text-4xl md:text-6xl mb-16">Mes thèmes</h2>
+      <h2 className="text-center text-4xl md:text-6xl mb-16 text-primary">
+        Mes thèmes
+      </h2>
       {data && data.myThemes.length > 0 ? (
         data.myThemes.map((t) => (
           <Link href={`/themes_coran/${t.id}`} key={t.id}>

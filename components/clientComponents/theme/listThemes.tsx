@@ -40,6 +40,15 @@ export const ListThemes = ({ themes, admin }: props) => {
   const getAllThemesWithRecursiveSubThemes = useCallback(
     (theme: ThemeWithSubThemes, subLevel: number) => {
       const subThemes = themes.filter((t) => t.parentId === theme.id);
+      const mapLevelColor: { [key: number]: string } = {
+        4: "#F97316",
+        2: "#3357FF",
+        6: "#22C55E",
+        8: "#F43F5E",
+      };
+      const getColorForNumber = (num: number): string => {
+        return mapLevelColor[num] || "#000000"; // Noir par défaut si le nombre n'existe pas
+      };
 
       if (gridMod && theme.parentId === null) {
         return (
@@ -59,7 +68,6 @@ export const ListThemes = ({ themes, admin }: props) => {
           </ThemeCard>
         );
       }
-
       return (
         <div
           className={cn(
@@ -85,6 +93,7 @@ export const ListThemes = ({ themes, admin }: props) => {
                 (colorTheme === "light" || !colorTheme),
               "arrow-white": theme.parentId !== null && colorTheme === "dark",
             })}
+            style={{ color: getColorForNumber(subLevel) }}
           >
             {theme.name}
             {theme.ayats.length > 0 && <span>({theme.ayats.length})</span>}
@@ -127,7 +136,7 @@ export const ListThemes = ({ themes, admin }: props) => {
 
   return (
     <div>
-      <h2 className="text-center text-4xl md:text-6xl">
+      <h2 className="text-center text-4xl md:text-6xl text-primary">
         Arborescence des thèmes coraniques
       </h2>
       <div

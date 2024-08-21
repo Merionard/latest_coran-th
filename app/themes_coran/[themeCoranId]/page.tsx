@@ -287,7 +287,8 @@ export default async function ViewTheme({
 
   return (
     <div className="flex flex-grow gap-3 items-baseline">
-      {getSubThemeContent()}
+      {theme.ayats.length > 0 ||
+        (theme.hadiths.length > 0 && getSubThemeContent())}
       <div className="md:w-3/4 mx-auto">
         <div className="flex justify-center mb-10 flex-1">
           {theme.parentId && (
@@ -310,7 +311,10 @@ export default async function ViewTheme({
           {theme?.name}
         </h2>
         <div className="flex justify-between gap-2 mt-10 mb-2">
-          <SousThemeList subThemes={theme.subThemes} />
+          {theme.ayats.length > 0 ||
+            (theme.hadiths.length > 0 && (
+              <SousThemeList subThemes={theme.subThemes} />
+            ))}
           <div>
             <Button
               asChild
@@ -361,6 +365,29 @@ export default async function ViewTheme({
             </>
           )}
         </div>
+        {theme.ayats.length === 0 && theme.hadiths.length === 0 && (
+          <div>
+            <h4
+              className={
+                berkshire.className +
+                " text-4xl mt-5 mb-3 text-center text-orange-400 "
+              }
+            >
+              Sous thèmes
+            </h4>
+            <div className="flex flex-col gap-2">
+              {theme.subThemes.map((subTheme) => (
+                <Link
+                  href={`/themes_coran/${subTheme.id}`}
+                  key={subTheme.id}
+                  className="text-primary active:text-black p-2 border rounded-xl duration-300 cursor-pointer border-gray-600 hover:bg-primary hover:text-white"
+                >
+                  {subTheme.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
