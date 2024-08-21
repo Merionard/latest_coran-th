@@ -27,6 +27,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Berkshire_Swash } from "next/font/google";
 import { SousThemeList } from "@/components/clientComponents/theme/sousThemeList";
+import { cn } from "@/lib/utils";
+import { clsx } from "clsx";
 
 const berkshire = Berkshire_Swash({ weight: "400", subsets: ["latin"] });
 
@@ -138,6 +140,9 @@ export default async function ViewTheme({
   };
 
   const getSubThemeContent = () => {
+    if (theme.ayats.length === 0 && theme.hadiths.length === 0) {
+      return null;
+    }
     if (theme.subThemes.length > 0) {
       return (
         <div className="hidden md:block ">
@@ -284,11 +289,9 @@ export default async function ViewTheme({
       </div>
     );
   }
-
   return (
     <div className="flex flex-grow gap-3 items-baseline">
-      {theme.ayats.length > 0 ||
-        (theme.hadiths.length > 0 && getSubThemeContent())}
+      {getSubThemeContent()}
       <div className="md:w-3/4 mx-auto">
         <div className="flex justify-center mb-10 flex-1">
           {theme.parentId && (
@@ -310,11 +313,18 @@ export default async function ViewTheme({
         >
           {theme?.name}
         </h2>
-        <div className="flex justify-between gap-2 mt-10 mb-2">
-          {theme.ayats.length > 0 ||
-            (theme.hadiths.length > 0 && (
-              <SousThemeList subThemes={theme.subThemes} />
-            ))}
+        <div
+          className={cn(
+            "flex md:justify-end gap-2 mt-10 mb-2",
+            (theme.ayats.length > 0 || theme.hadiths.length > 0) &&
+              theme.subThemes.length > 0
+              ? "justify-between"
+              : "justify-end"
+          )}
+        >
+          {(theme.ayats.length > 0 || theme.hadiths.length > 0) && (
+            <SousThemeList subThemes={theme.subThemes} />
+          )}
           <div>
             <Button
               asChild
