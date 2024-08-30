@@ -11,7 +11,7 @@ help:
 	@echo "  help                    - Displays this help message."
 
 build-and-push-images:
-	sed -i "s/^LABEL date=\"[^\"]*\"/LABEL date=\"$(DATE)\"/" Dockerfile; \
+	@sed -i "s/^LABEL date=\"[^\"]*\"/LABEL date=\"$(DATE)\"/" Dockerfile; \
 	docker login --username merionard && \
 	docker build --file ./Dockerfile -t coran-th:latest . && \
 	docker tag coran-th:latest merionard/coran-th:latest && \

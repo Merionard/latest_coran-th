@@ -1,13 +1,7 @@
 services:
   coran-themes:
     container_name: coran-themes
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-        GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-        DATABASE_URL: ${DATABASE_URL}
+    image: merionard/coran-th:latest
     restart: always
     ports:
       - 3000:3000
