@@ -285,6 +285,25 @@ export default async function ViewTheme({
               ))}
             </div>
           </div>
+          <h4
+            className={
+              berkshire.className +
+              " text-4xl mt-5 mb-3 text-center text-orange-400 "
+            }
+          >
+            Sous thèmes
+          </h4>
+          <div className="flex flex-col gap-2">
+            {theme.subThemes.map((subTheme) => (
+              <Link
+                href={`/themes_coran/${subTheme.id}`}
+                key={subTheme.id}
+                className="text-primary active:text-black p-2 border rounded-xl duration-300 cursor-pointer border-gray-600 hover:bg-primary hover:text-white"
+              >
+                {subTheme.name}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     );
