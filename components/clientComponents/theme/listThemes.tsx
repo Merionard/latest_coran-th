@@ -26,7 +26,6 @@ type props = {
 export const ListThemes = ({ themes, admin }: props) => {
   const [search, setSearch] = useState("");
   const [gridMod, setGridMode] = useState(false);
-  const { data: session } = useSession();
   const { theme: colorTheme } = useTheme();
 
   const filteredThemes = useMemo(() => {
@@ -87,7 +86,7 @@ export const ListThemes = ({ themes, admin }: props) => {
               "text-base": gridMod,
               "font-bold text-2xl": !gridMod && theme.parentId === null,
               "text-xl": !gridMod && theme.parentId !== null,
-              "active:text-primary": true,
+              "active:underline": true,
               "arrow-dark":
                 theme.parentId !== null &&
                 (colorTheme === "light" || !colorTheme),
