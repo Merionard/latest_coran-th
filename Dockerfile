@@ -15,6 +15,7 @@ ENV GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
 ENV GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
 ENV DATABASE_URL=${DATABASE_URL}
 
+
 COPY . .
 
 RUN npm install
@@ -22,4 +23,5 @@ RUN npm install
 EXPOSE 3000
 
 #CMD ["npm","run","start"]
-CMD ["docker-entrypoint.sh"]
+CMD ["./docker-entrypoint.sh"]
+#CMD ["sleep", "infinity"]
