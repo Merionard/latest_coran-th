@@ -161,4 +161,5 @@ usersLearn User[] @relation("hadithsLearned")
 inBookReference String?
 hadithReference String?
 theme      theme[]  @relation("HadithThemes")
+searchVector Unsupported("tsvector")?
 }

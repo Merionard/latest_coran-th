@@ -167,21 +167,35 @@ export const searchHadiths = async (
 ) => {
   const offset = (page - 1) * pageSize;
 
-  const [result] = await prisma.$transaction([
-    prisma.$queryRaw<HadithSearch[]>`
-      SELECT h.* ,hb."titleTraductionFr"
-      FROM "hadith" h
-      JOIN  "hadithChapter" hc on hc.id = h.hadith_chapter 
-      JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
-      WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
-      ILIKE ${"%" + search + "%"}
-      OR h."traductionFr" ILIKE  ${"%" + search + "%"}
-      LIMIT ${pageSize}
-      OFFSET ${offset}
-    `,
-  ]);
+  const result = await prisma.$queryRaw<HadithSearch[]>`
+      SELECT 
+      h.id,
+      h."hadithReference",
+      h.content,
+      h."traductionEn",
+      h."traductionFr",
+      hb."titleTraductionFr"
+    FROM "hadith" h
+    JOIN "hadithChapter" hc ON hc.id = h.hadith_chapter
+    JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id
+    WHERE h."searchVector" @@ plainto_tsquery('arabic', ${search})
+       OR h."searchVector" @@ plainto_tsquery('french', ${search})
+    ORDER BY ts_rank(h."searchVector", plainto_tsquery('arabic', ${search})) +
+             ts_rank(h."searchVector", plainto_tsquery('french', ${search})) DESC
+    LIMIT ${pageSize}
+    OFFSET ${offset}
+  `;
+
+  const totalCount = await prisma.$queryRaw<number>`
+    SELECT COUNT(*)::integer
+    FROM "hadith" h
+    WHERE h."searchVector" @@ plainto_tsquery('arabic', ${search})
+       OR h."searchVector" @@ plainto_tsquery('french', ${search})
+  `;
 
   return {
-    ayats: result,
+    hadiths: result,
+    //@ts-ignore
+    totalCount: Number(totalCount),
   };
 };

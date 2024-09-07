@@ -21,20 +21,12 @@ export const SearchHadith = () => {
   const pageSize = 10;
 
   const fetchHadiths = async (searchTerm: string, pageNumber: number) => {
-    if (totalPages === 1) {
-      FirstSearchHadiths(searchTerm, pageNumber, pageSize).then((result) => {
-        setHadiths(result.ayats);
-        setTotalPages(Math.ceil(result.totalCount / pageSize));
-        setPage(pageNumber);
-        setIsLoading(false);
-      });
-    } else {
-      searchHadiths(searchTerm, pageNumber, pageSize).then((result) => {
-        setHadiths(result.ayats);
-        setPage(pageNumber);
-        setIsLoading(false);
-      });
-    }
+    searchHadiths(searchTerm, pageNumber, pageSize).then((result) => {
+      setHadiths(result.hadiths);
+      setTotalPages(Math.ceil(result.totalCount / pageSize));
+      setPage(pageNumber);
+      setIsLoading(false);
+    });
 
     setIsLoading(true);
   };
@@ -138,6 +130,8 @@ export const SearchHadith = () => {
   }
 
   const onSearch = (value: string) => {
+    setPage(1);
+    setTotalPages(1);
     if (value === "") {
       setHadiths([]);
     }
