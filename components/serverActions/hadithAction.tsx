@@ -196,6 +196,6 @@ export const searchHadiths = async (
   return {
     hadiths: result,
     //@ts-ignore
-    totalCount: Number(totalCount),
+    totalCount: totalCount[0].count,
   };
 };

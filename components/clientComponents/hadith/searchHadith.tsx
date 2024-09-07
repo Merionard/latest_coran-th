@@ -22,6 +22,7 @@ export const SearchHadith = () => {
 
   const fetchHadiths = async (searchTerm: string, pageNumber: number) => {
     searchHadiths(searchTerm, pageNumber, pageSize).then((result) => {
+      console.log(result);
       setHadiths(result.hadiths);
       setTotalPages(Math.ceil(result.totalCount / pageSize));
       setPage(pageNumber);
