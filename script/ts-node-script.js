@@ -5,4 +5,4 @@ require("ts-node").register({
     module: "commonjs",
   },
 });
-require("./updateChapter");
+require("./hadithWord");
