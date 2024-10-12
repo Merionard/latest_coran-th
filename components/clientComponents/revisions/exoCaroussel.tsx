@@ -62,6 +62,9 @@ export const ExoCaroussel = ({ ayats }: props) => {
                 totalAyats={ayats.length}
                 resetTranscript={resetTranscript}
                 transcript={transcript}
+                startListen={startListening}
+                isListening={listening}
+                stopListen={stopListening}
               />
             </CarouselItem>
           ))}
@@ -69,28 +72,6 @@ export const ExoCaroussel = ({ ayats }: props) => {
         <CarouselPrevious className="hidden md:flex" />
         <CarouselNext className="hidden md:flex" />
       </Carousel>
-
-      <div className="flex justify-center mt-3">
-        {!listening ? (
-          <Button
-            variant={"default"}
-            size={"icon"}
-            onClick={startListening}
-            className="rounded-full"
-          >
-            <Disc />
-          </Button>
-        ) : (
-          <Button
-            variant={"destructive"}
-            size={"icon"}
-            onClick={stopListening}
-            className={cn("rounded-full", { "animate-pulse": listening })}
-          >
-            <StopCircle />
-          </Button>
-        )}
-      </div>
     </div>
   );
 };

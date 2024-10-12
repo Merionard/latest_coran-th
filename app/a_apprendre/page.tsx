@@ -30,6 +30,7 @@ async function getAyatsToLearn() {
   return await prisma.ayat.findMany({
     where: { toLearn: true },
     include: { sourate: true },
+    orderBy: [{ sourate_number: "asc" }, { number: "asc" }],
   });
 }
 

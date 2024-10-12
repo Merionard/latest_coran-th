@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { cleanTashkeel, cn } from "@/lib/utils";
 import { ayat } from "@prisma/client";
 
-import { Check, RotateCcw } from "lucide-react";
+import { Check, Disc, RotateCcw, StopCircle } from "lucide-react";
 import { ChangeEvent, useEffect, useState } from "react";
 import { stringSimilarity } from "string-similarity-js";
 import SpeechRecognition from "react-speech-recognition";
@@ -23,6 +23,17 @@ type props = {
   totalAyats: number;
   transcript: string;
   resetTranscript: () => void;
+  startListen: (
+    event:
+      | React.TouchEvent<HTMLButtonElement>
+      | React.MouseEvent<HTMLButtonElement>
+  ) => void;
+  stopListen: (
+    event:
+      | React.TouchEvent<HTMLButtonElement>
+      | React.MouseEvent<HTMLButtonElement>
+  ) => void;
+  isListening: boolean;
 };
 
 export const ExoCard = ({
@@ -31,6 +42,9 @@ export const ExoCard = ({
   totalAyats,
   resetTranscript,
   transcript,
+  startListen,
+  stopListen,
+  isListening,
 }: props) => {
   const [message, setMessage] = useState("");
   const [value, setValue] = useState("");
@@ -102,7 +116,28 @@ export const ExoCard = ({
               </>
             )}
 
-            <div className="flex justify-end ">
+            <div className="flex justify-between ">
+              {!isListening ? (
+                <Button
+                  variant={"default"}
+                  size={"icon"}
+                  onClick={startListen}
+                  className="rounded-full"
+                >
+                  <Disc />
+                </Button>
+              ) : (
+                <Button
+                  variant={"destructive"}
+                  size={"icon"}
+                  onClick={stopListen}
+                  className={cn("rounded-full", {
+                    "animate-pulse": isListening,
+                  })}
+                >
+                  <StopCircle />
+                </Button>
+              )}
               <Button onClick={validate} disabled={message.length > 0}>
                 Valider
                 <Check />
