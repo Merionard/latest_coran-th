@@ -56,7 +56,7 @@ export const Navbar = () => {
 
   return (
     <nav className="h-20 bg-background border-b-[1px] border-border p-5  md:flex  md:justify-end tracking-widest">
-      <div className="hidden md:flex items-center gap-5">
+      <div className="hidden md:flex items-center gap-5 b-shadow">
         {links
           .filter((l) => {
             if (session) {

@@ -12,20 +12,38 @@ import { Button } from "@/components/ui/button";
 import { addAyatOnTheme } from "../../serverActions/themeCoranAction";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { addAyatToLearn } from "@/components/serverActions/toLearnAction";
 
 type props = {
   sourateWhithAyat: SourateWhithAyat[];
-  themeId: number;
+  themeId?: number;
+  addToLearn?: boolean;
 };
 
-export const SelectAyat = ({ sourateWhithAyat, themeId }: props) => {
+export const SelectAyat = ({
+  sourateWhithAyat,
+  themeId,
+  addToLearn,
+}: props) => {
   const [sourateSelected, setSourateSelected] = useState<number | null>(null);
   const [selectedAyatId, setSelectedAyatId] = useState<number | null>(null);
   const router = useRouter();
 
   const AddAyat = async () => {
+    if (!themeId) return;
     try {
       const updatedAyat = await addAyatOnTheme(themeId, Number(selectedAyatId));
+      if (updatedAyat) {
+        toast.success("Ayat rajoutée avec succès!");
+        router.refresh();
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+  const handleAddToLearn = async () => {
+    try {
+      const updatedAyat = await addAyatToLearn(Number(selectedAyatId));
       if (updatedAyat) {
         toast.success("Ayat rajoutée avec succès!");
         router.refresh();
@@ -73,9 +91,16 @@ export const SelectAyat = ({ sourateWhithAyat, themeId }: props) => {
             ))}
         </SelectContent>
       </Select>
-      <Button onClick={AddAyat} className="m-auto">
-        Ajouter au thème
-      </Button>
+      {themeId && (
+        <Button onClick={AddAyat} className="m-auto">
+          Ajouter au thème
+        </Button>
+      )}
+      {addToLearn && (
+        <Button onClick={handleAddToLearn} className="m-auto">
+          Ajouter aux versets à apprendre
+        </Button>
+      )}
     </div>
   );
 };

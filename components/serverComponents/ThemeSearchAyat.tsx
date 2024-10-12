@@ -11,7 +11,10 @@ export type SourateWhithAyat = Prisma.sourateGetPayload<
   typeof sourateWhithAyat
 >;
 
-export default async function ThemeSearchAyat(props: { themeId: number }) {
+export default async function ThemeSearchAyat(props: {
+  themeId?: number;
+  addToLearn?: boolean;
+}) {
   const souratesWhithAyats = await prisma.sourate.findMany({
     include: {
       ayats: {
@@ -34,7 +37,8 @@ export default async function ThemeSearchAyat(props: { themeId: number }) {
     <div>
       <SelectAyat
         sourateWhithAyat={souratesWhithAyats}
-        themeId={props.themeId}
+        themeId={props && props.themeId}
+        addToLearn={props && props.addToLearn}
       />
     </div>
   );

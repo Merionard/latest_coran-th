@@ -1,4 +1,6 @@
 import { AyatCard } from "@/components/clientComponents/ayat/ayatCard";
+import { searchAyats } from "@/components/serverActions/coranAction";
+import ThemeSearchAyat from "@/components/serverComponents/ThemeSearchAyat";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/prisma/client";
 import { ayat } from "@prisma/client";
@@ -10,6 +12,7 @@ export default async function ToLearn() {
 
   return (
     <div className="space-y-3 md:container">
+      {user?.role === "ADMIN" && <ThemeSearchAyat addToLearn />}
       {ayats.map((a) => (
         <AyatCard
           key={a.id}
