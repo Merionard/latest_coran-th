@@ -21,30 +21,23 @@ const MAX_CHAPTERS_PER_FILE = 10;
 
 function compareHadithReferences(a: string, b: string): number {
   const splitReference = (ref: string) => {
-    // Supprime les espaces autour de la chaîne
     ref = ref.trim();
     const trimmedString = ref.replace(/\s+/g, "");
 
-    // Extrait un numéro suivi de lettres (si elles existent)
     const match = trimmedString.match(/^(\d+)([a-z]*)$/i);
     if (match) {
-      // Retourne la partie numérique et la partie alphabétique en minuscule
       return [parseInt(match[1], 10), match[2].toLowerCase()];
     }
     return [0, trimmedString];
   };
 
-  // Applique la fonction de découpage pour les deux références
-
   const [numA, letterA] = splitReference(a);
   const [numB, letterB] = splitReference(b);
-  // Comparaison des parties numériques
+
   if (numA !== numB) {
     //@ts-ignore
     return numA - numB;
   }
-
-  // Comparaison des parties alphabétiques (lettres) avec localeCompare
   //@ts-ignore
   return letterA.localeCompare(letterB);
 }
@@ -71,12 +64,29 @@ async function createWordDocuments(bookId: number) {
     fs.mkdirSync(outputDir);
   }
 
-  // Créer la table des matières (code inchangé)
-  // ...
+  // Créer une seule fois le sommaire pour l'ensemble du document
+  const orderChapter = book.chapters.sort((a, b) => a.id - b.id);
+  const childrenSommaire: FileChild[] = [
+    new Paragraph({
+      text: "SOMMAIRE",
+      heading: HeadingLevel.HEADING_1,
+      alignment: AlignmentType.CENTER,
+    }),
+  ];
+
+  for (const chapter of orderChapter) {
+    const chapterParagraph = new Paragraph({
+      children: [
+        new TextRun({
+          text: chapter.titleFr ?? "",
+        }),
+      ],
+    });
+    childrenSommaire.push(chapterParagraph);
+  }
 
   // Diviser les chapitres en plusieurs fichiers
   for (let i = 0; i <= book.chapters.length; i += MAX_CHAPTERS_PER_FILE) {
-    const orderChapter = book.chapters.sort((a, b) => a.id - b.id);
     const chaptersSlice = orderChapter.slice(i, i + MAX_CHAPTERS_PER_FILE);
     const partNumber = Math.floor(i / MAX_CHAPTERS_PER_FILE) + 1;
 
@@ -91,44 +101,20 @@ async function createWordDocuments(bookId: number) {
       }),
     ];
 
-    children.push(
-      new Paragraph({
-        text: "SOMMAIRE",
-        heading: HeadingLevel.HEADING_1, // Utilise un niveau de titre approprié
-        alignment: AlignmentType.CENTER, // Centrer le titre si souhaité
-      })
-    );
-
-    // Crée un tableau pour stocker les paragraphes du sommaire
-    const childrenSommaire: FileChild[] = [];
-    for (const chapter of book.chapters) {
-      // Crée un nouveau paragraphe pour chaque chapitre
-      const chapterParagraph = new Paragraph({
-        children: [
-          new TextRun({
-            text: chapter.titleFr ?? "",
-          }),
-        ],
-      });
-
-      // Ajoute le paragraphe au sommaire
-      childrenSommaire.push(chapterParagraph);
+    // Ajouter le sommaire au début du premier fichier seulement
+    if (i === 0) {
+      children.push(...childrenSommaire);
     }
-
-    // Ajoute chaque chapitre du sommaire à la page
-    children.push(...childrenSommaire);
 
     for (const chapter of chaptersSlice) {
       children.push(
         new Paragraph({
           text: chapter.title,
           heading: HeadingLevel.HEADING_2,
-          children: childrenSommaire,
           pageBreakBefore: true,
         })
       );
 
-      // Trier les hadiths par référence
       const sortedHadiths = chapter.hadiths.sort((a, b) =>
         compareHadithReferences(
           a.hadithReference ?? "",
@@ -149,8 +135,16 @@ async function createWordDocuments(bookId: number) {
                 size: 28,
                 rightToLeft: true,
               }),
-              new TextRun({ text: ` - ${hadith.narratorFr}`, italics: true }),
-              new TextRun({ text: ` - ${hadith.traductionFr}`, italics: true }),
+              new TextRun({
+                text: ` - ${hadith.narratorFr}`,
+                italics: true,
+                size: 28,
+              }),
+              new TextRun({
+                text: ` - ${hadith.traductionFr}`,
+                italics: true,
+                size: 28,
+              }),
             ],
           }),
           new Paragraph({}),
@@ -185,7 +179,7 @@ async function createWordDocuments(bookId: number) {
 }
 
 async function main() {
-  const bookId = 2; // Remplacez par l'ID du livre que vous voulez traiter
+  const bookId = 17; // Remplacez par l'ID du livre que vous voulez traiter
   await createWordDocuments(bookId);
   await prisma.$disconnect();
 }
