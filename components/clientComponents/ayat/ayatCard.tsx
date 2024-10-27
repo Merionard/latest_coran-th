@@ -91,7 +91,7 @@ export const AyatCard = (props: {
               />
             </button>
           )}
-          {session && session.data && props.isFavorite && (
+          {session && session.data && (
             <button
               className={cn(
                 "flex justify-center items-center rounded-full border p-2"

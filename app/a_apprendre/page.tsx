@@ -1,4 +1,5 @@
 import { AyatCard } from "@/components/clientComponents/ayat/ayatCard";
+import { ToLearnPageContent } from "@/components/clientComponents/toLearn/toLearnPageContent";
 import { searchAyats } from "@/components/serverActions/coranAction";
 import ThemeSearchAyat from "@/components/serverComponents/ThemeSearchAyat";
 import { getAuthSession } from "@/lib/auth";
@@ -13,15 +14,11 @@ export default async function ToLearn() {
   return (
     <div className="space-y-3 md:container">
       {user?.role === "ADMIN" && <ThemeSearchAyat addToLearn />}
-      {ayats.map((a) => (
-        <AyatCard
-          key={a.id}
-          ayat={a}
-          titreSourate={a.sourate.titre}
-          isFavorite={isAyatFavorite(a, user)}
-          isLearned={isAyatLearned(a, user)}
-        />
-      ))}
+      <ToLearnPageContent
+        allAyats={ayats}
+        ayatInFavorite={user ? user.myAyats : []}
+        ayatLearnedByUser={user ? user.ayatsLearned : []}
+      />
     </div>
   );
 }
