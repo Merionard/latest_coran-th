@@ -8,57 +8,62 @@ import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/searchInput";
 import { cleanTashkeel } from "@/lib/utils";
 import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
+import { Pagination } from "../transverse/pagination";
+import { AyatCard } from "../ayat/ayatCard";
 
 type props = {
   ifSomeSearch: (is: boolean) => void;
 };
 
-export const SearchAyat = ({ ifSomeSearch }: props) => {
-  const [search, setSearch] = useState("");
+export const SearchAyat: React.FC<props> = ({ ifSomeSearch }) => {
+  const [search, setSearch] = useState<string>("");
   const [ayats, setAyats] = useState<AyatWithTitre[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const pageSize = 10;
+  const PAGE_SIZE = 10;
 
-  const fetchAyats = async (searchTerm: string, pageNumber: number) => {
-    searchAyats(searchTerm, pageNumber, pageSize).then((result) => {
-      setAyats(result.ayats);
-      setTotalPages(Math.ceil(result.totalCount / pageSize));
-      setPage(pageNumber);
-      setIsLoading(false);
-    });
-    setIsLoading(true);
-  };
+  const fetchAyats = useCallback(
+    async (searchTerm: string, pageNumber: number): Promise<void> => {
+      if (!searchTerm.trim()) {
+        setAyats([]);
+        setTotalPages(1);
+        return;
+      }
 
-  const onSetSearch = async () => {
-    if (search === "") {
-      setAyats([]);
-      setPage(1);
-      setTotalPages(1);
-      return;
-    }
-    setPage(1); // Reset to first page on new search
+      setIsLoading(true);
+      try {
+        const result = await searchAyats(searchTerm, pageNumber, PAGE_SIZE);
+        setAyats(result.ayats);
+        setTotalPages(Math.ceil(result.totalCount / PAGE_SIZE));
+        setPage(pageNumber);
+      } catch (error) {
+        console.error("Erreur lors de la recherche:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const handleSearch = useCallback(async (): Promise<void> => {
+    setPage(1);
     await fetchAyats(search, 1);
-  };
+  }, [search, fetchAyats]);
 
-  const handlePreviousPage = async () => {
-    if (page > 1) {
-      const newPage = page - 1;
-      setPage(newPage);
-      await fetchAyats(search, newPage);
-    }
-  };
+  const handlePageChange = useCallback(
+    (newPage: number): void => {
+      fetchAyats(search, newPage);
+    },
+    [search, fetchAyats]
+  );
 
-  const handleNextPage = async () => {
-    if (page < totalPages) {
-      const newPage = page + 1;
-      setPage(newPage);
-      await fetchAyats(search, newPage);
-    }
-  };
+  // Mettre à jour ifSomeSearch quand les ayats changent
+  const hasResults = ayats.length > 0;
+  ifSomeSearch(hasResults);
+
   const highlightSearchTerm = (
     text: string,
     searchTerm: string
@@ -88,62 +93,6 @@ export const SearchAyat = ({ ifSomeSearch }: props) => {
     );
   };
 
-  const getPagninationBtn = () => {
-    const buttons = [];
-    if (totalPages <= 10) {
-      for (let i = 1; i <= totalPages; i++) {
-        buttons.push(
-          <Button
-            key={i}
-            variant={i === page ? "default" : "secondary"}
-            onClick={() => fetchAyats(search, i)}
-          >
-            {i}
-          </Button>
-        );
-      }
-      return buttons;
-    } else {
-      const indexPages = [1, 2, 3, totalPages];
-      if (!indexPages.includes(page)) {
-        indexPages.push(page);
-        if (page > 3) {
-          indexPages.splice(0, 3);
-          indexPages.push(page - 1);
-          indexPages.push(page - 2);
-          indexPages.push(page - 3);
-        }
-        indexPages.sort((a, b) => a - b);
-      }
-      return indexPages.map((i) => (
-        <Button
-          key={i}
-          variant={i === page ? "default" : "secondary"}
-          onClick={() => fetchAyats(search, i)}
-        >
-          {i}
-        </Button>
-      ));
-    }
-  };
-
-  if (ayats.length > 0) {
-    ifSomeSearch(true);
-  } else {
-    ifSomeSearch(false);
-  }
-
-  if (isLoading) {
-    return <Loader className="animate-spin mx-auto" />;
-  }
-
-  const onSearch = (value: string) => {
-    if (value === "") {
-      setAyats([]);
-    }
-    setSearch(value);
-  };
-
   const hitlightSearchTrad = (search: string, traduction: string | null) => {
     if (!traduction) {
       return "";
@@ -166,52 +115,62 @@ export const SearchAyat = ({ ifSomeSearch }: props) => {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader className="animate-spin h-8 w-8 text-primary" />
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="space-y-6">
       <div className="flex justify-end gap-2">
         <SearchInput
-          onSearch={onSearch}
+          onSearch={(value: string) => {
+            if (value === "") {
+              setAyats([]);
+            }
+            setSearch(value);
+          }}
           search={search}
           placeHolder="Rechercher dans le coran"
         />
-        <Button onClick={onSetSearch}>Rechercher</Button>
+        <Button onClick={handleSearch}>Rechercher</Button>
       </div>
 
-      {ayats.length > 0 && (
-        <div className="flex justify-center mt-5 gap-3 items-center">
-          <Button
-            onClick={handlePreviousPage}
-            size={"icon"}
-            disabled={page === 1}
-            className="disabled:bg-gray-400"
-          >
-            <ChevronLeft />
-          </Button>
-          {getPagninationBtn()}
-          <Button
-            onClick={handleNextPage}
-            size={"icon"}
-            disabled={page === totalPages}
-            className="disabled:bg-gray-400"
-          >
-            <ChevronRight />
-          </Button>
-        </div>
+      {hasResults && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
-      <div className="mt-5 space-y-5">
-        {ayats.map((a) => (
-          <div key={a.id} className="border-b-2 space-y-3 bg-card">
-            <div className="">
-              {" "}
-              Sourate {a.sourate_number} verset {a.number}{" "}
-              <span>{a.titre}</span>
+
+      <div className="space-y-4">
+        <div className="mt-5 space-y-5">
+          {ayats.map((a) => (
+            <div key={a.id} className="border-b-2 space-y-3 bg-card p-3">
+              <div className="">
+                {" "}
+                Sourate {a.sourate_number} verset {a.number}{" "}
+                <span>{a.titre}</span>
+              </div>
+              <p className="text-2xl text-right">
+                {highlightSearchTerm(a.content, search)}
+              </p>
+              <p>{hitlightSearchTrad(search, a.traduction)}</p>
             </div>
-            <p className="text-2xl text-right">
-              {highlightSearchTerm(a.content, search)}
-            </p>
-            <p>{hitlightSearchTrad(search, a.traduction)}</p>
-          </div>
-        ))}
+          ))}
+        </div>
+
+        {hasResults && (
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
     </div>
   );

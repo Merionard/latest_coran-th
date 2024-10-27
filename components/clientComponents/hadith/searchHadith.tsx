@@ -1,216 +1,177 @@
 "use client";
-
 import {
-  FirstSearchHadiths,
   HadithSearch,
   searchHadiths,
 } from "@/components/serverActions/hadithAction";
 import { Button } from "@/components/ui/button";
 import { SearchInput } from "@/components/ui/searchInput";
 import { cleanTashkeel } from "@/lib/utils";
-import { ChevronLeft, ChevronRight, Loader } from "lucide-react";
-import { useState } from "react";
+import { Loader } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Pagination } from "../transverse/pagination";
 
-export const SearchHadith = () => {
-  const [search, setSearch] = useState("");
-  const [hadiths, setHadiths] = useState<HadithSearch[]>([]);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
+interface HighlightedTextProps {
+  text: string;
+  searchTerm: string;
+  isArabic?: boolean;
+}
 
-  const pageSize = 10;
+interface HadithCardProps {
+  hadith: HadithSearch;
+  searchTerm: string;
+}
 
-  const fetchHadiths = async (searchTerm: string, pageNumber: number) => {
-    searchHadiths(searchTerm, pageNumber, pageSize).then((result) => {
-      console.log(result);
-      setHadiths(result.hadiths);
-      setTotalPages(Math.ceil(result.totalCount / pageSize));
-      setPage(pageNumber);
-      setIsLoading(false);
-    });
+// Composant pour la mise en évidence du texte
+const HighlightedText: React.FC<HighlightedTextProps> = ({
+  text,
+  searchTerm,
+  isArabic = false,
+}) => {
+  if (!searchTerm.trim() || !text) return <>{text}</>;
 
-    setIsLoading(true);
-  };
-
-  const onSetSearch = async () => {
-    if (search === "") {
-      setHadiths([]);
-      setPage(1);
-      setTotalPages(1);
-      return;
+  const processText = (t: string): { processed: string; search: string } => {
+    if (isArabic) {
+      const textWithoutHarakat = cleanTashkeel(t);
+      const searchWithoutHarakat = cleanTashkeel(searchTerm);
+      return { processed: textWithoutHarakat, search: searchWithoutHarakat };
     }
-    setPage(1); // Reset to first page on new search
-    await fetchHadiths(search, 1);
+    return { processed: t, search: searchTerm };
   };
 
-  const handlePreviousPage = async () => {
-    if (page > 1) {
-      const newPage = page - 1;
-      setPage(newPage);
-      await fetchHadiths(search, newPage);
-    }
-  };
-
-  const handleNextPage = async () => {
-    if (page < totalPages) {
-      const newPage = page + 1;
-      setPage(newPage);
-      await fetchHadiths(search, newPage);
-    }
-  };
-  const highlightSearchTerm = (
-    text: string,
-    searchTerm: string
-  ): JSX.Element => {
-    if (!searchTerm.trim()) {
-      return <>{text}</>;
-    }
-    const harakats = /[\u064B-\u065F\u0670\u06D6-\u06ED\u0671]/g;
-    const textWithoutHarakat = cleanTashkeel(text);
-    const searhWithoutHarakats = cleanTashkeel(searchTerm);
-
-    const regex = new RegExp(`(${searhWithoutHarakats})`, "gi");
-    const parts = textWithoutHarakat.split(regex);
-
-    return (
-      <>
-        {parts.map((part, index) =>
-          regex.test(part.replace(harakats, "")) ? (
-            <span key={index} className="bg-yellow-400">
-              {part}
-            </span>
-          ) : (
-            part
-          )
-        )}
-      </>
-    );
-  };
-
-  const getPagninationBtn = () => {
-    const buttons = [];
-    if (totalPages <= 10) {
-      for (let i = 1; i <= totalPages; i++) {
-        buttons.push(
-          <Button
-            key={i}
-            variant={i === page ? "default" : "secondary"}
-            onClick={() => fetchHadiths(search, i)}
-          >
-            {i}
-          </Button>
-        );
-      }
-      return buttons;
-    } else {
-      const indexPages = [1, 2, 3, totalPages];
-      if (!indexPages.includes(page)) {
-        indexPages.push(page);
-        if (page > 3) {
-          indexPages.splice(0, 3);
-          indexPages.push(page - 1);
-          indexPages.push(page - 2);
-          indexPages.push(page - 3);
-        }
-        indexPages.sort((a, b) => a - b);
-      }
-      return indexPages.map((i) => (
-        <Button
-          key={i}
-          variant={i === page ? "default" : "secondary"}
-          onClick={() => fetchHadiths(search, i)}
-        >
-          {i}
-        </Button>
-      ));
-    }
-  };
-
-  if (isLoading) {
-    return <Loader className="animate-spin mx-auto" />;
-  }
-
-  const onSearch = (value: string) => {
-    setPage(1);
-    setTotalPages(1);
-    if (value === "") {
-      setHadiths([]);
-    }
-    setSearch(value);
-  };
-
-  const hitlightSearchTrad = (search: string, traduction: string | null) => {
-    if (!traduction) {
-      return "";
-    }
-    const regex = new RegExp(`(${search})`, "gi");
-    const parts = traduction.split(regex);
-
-    return (
-      <>
-        {parts.map((part, index) =>
-          regex.test(part) ? (
-            <span key={index} className="bg-yellow-400">
-              {part}
-            </span>
-          ) : (
-            part
-          )
-        )}
-      </>
-    );
-  };
+  const { processed, search } = processText(text);
+  const regex = new RegExp(`(${search})`, "gi");
+  const parts = processed.split(regex);
 
   return (
-    <div>
+    <>
+      {parts.map((part, index) =>
+        regex.test(
+          part.replace(/[\u064B-\u065F\u0670\u06D6-\u06ED\u0671]/g, "")
+        ) ? (
+          <span key={index} className="bg-yellow-400">
+            {part}
+          </span>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+};
+
+// Composant HadithCard
+const HadithCard: React.FC<HadithCardProps> = ({ hadith, searchTerm }) => (
+  <div className="border rounded-lg shadow-sm bg-card p-4 space-y-3 hover:shadow-md transition-shadow">
+    <div className="flex justify-between items-start">
+      <h3 className="text-xl font-bold text-primary">
+        {hadith.titleTraductionFr}
+      </h3>
+      <span className="text-sm font-medium bg-primary/10 px-2 py-1 rounded-full">
+        Hadith n°{hadith.hadithReference}
+      </span>
+    </div>
+    <p className="text-2xl text-right leading-relaxed">
+      <HighlightedText
+        text={hadith.content}
+        searchTerm={searchTerm}
+        isArabic={true}
+      />
+    </p>
+    <p className="text-gray-700">
+      <HighlightedText
+        text={hadith.traductionFr ?? ""}
+        searchTerm={searchTerm}
+      />
+    </p>
+  </div>
+);
+
+// Composant principal
+export const SearchHadith: React.FC = () => {
+  const [search, setSearch] = useState<string>("");
+  const [hadiths, setHadiths] = useState<HadithSearch[]>([]);
+  const [page, setPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const PAGE_SIZE = 10;
+
+  const fetchHadiths = useCallback(
+    async (searchTerm: string, pageNumber: number): Promise<void> => {
+      if (!searchTerm.trim()) {
+        setHadiths([]);
+        setTotalPages(1);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const result = await searchHadiths(searchTerm, pageNumber, PAGE_SIZE);
+        setHadiths(result.hadiths);
+        setTotalPages(Math.ceil(result.totalCount / PAGE_SIZE));
+        setPage(pageNumber);
+      } catch (error) {
+        console.error("Erreur lors de la recherche:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
+
+  const handleSearch = useCallback(async (): Promise<void> => {
+    setPage(1);
+    await fetchHadiths(search, 1);
+  }, [search, fetchHadiths]);
+
+  const handlePageChange = useCallback(
+    (newPage: number): void => {
+      fetchHadiths(search, newPage);
+    },
+    [search, fetchHadiths]
+  );
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader className="animate-spin h-8 w-8 text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
       <div className="flex justify-end gap-2">
         <SearchInput
-          onSearch={onSearch}
+          onSearch={setSearch}
           search={search}
           placeHolder="Rechercher hadiths"
         />
-        <Button onClick={onSetSearch}>Rechercher</Button>
+        <Button onClick={handleSearch}>Rechercher</Button>
       </div>
 
       {hadiths.length > 0 && (
-        <div className="flex justify-center mt-5 gap-3 items-center">
-          <Button
-            onClick={handlePreviousPage}
-            size={"icon"}
-            disabled={page === 1}
-            className="disabled:bg-gray-400"
-          >
-            <ChevronLeft />
-          </Button>
-          {getPagninationBtn()}
-          <Button
-            onClick={handleNextPage}
-            size={"icon"}
-            disabled={page === totalPages}
-            className="disabled:bg-gray-400"
-          >
-            <ChevronRight />
-          </Button>
-        </div>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       )}
-      <div className="mt-5 space-y-5">
+
+      <div className="space-y-4">
         {hadiths.map((hadith) => (
-          <div key={hadith.id} className="border-b-2 space-y-3 bg-card p-3">
-            <div className="flex justify-between">
-              <p className="text-xl font-bold text-primary">
-                {hadith.titleTraductionFr}
-              </p>
-              <p className="font-bold">
-                Hadith numéro:{hadith.hadithReference}
-              </p>
-            </div>
-            <p className="text-2xl text-right">
-              {highlightSearchTerm(hadith.content, search)}
-            </p>
-            <p>{hitlightSearchTrad(search, hadith.traductionFr)}</p>
-          </div>
+          <HadithCard key={hadith.id} hadith={hadith} searchTerm={search} />
         ))}
       </div>
+
+      {hadiths.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   );
 };
+
+export default SearchHadith;
