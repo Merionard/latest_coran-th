@@ -23,5 +23,5 @@ RUN npm install
 EXPOSE 3000
 
 #CMD ["npm","run","start"]
-CMD ["./docker-entrypoint.sh"]
+CMD npm run build && npm run start
 #CMD ["sleep", "infinity"]
