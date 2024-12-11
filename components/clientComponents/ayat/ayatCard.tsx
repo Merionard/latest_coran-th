@@ -11,9 +11,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import CopyButton from "@/components/ui/copyButton";
+import ShareButtons from "@/components/ui/shareButtons";
 import { cn } from "@/lib/utils";
 import { ayat, theme } from "@prisma/client";
-import { BookCheck, Check, Heart, Trash } from "lucide-react";
+import { BookCheck, Check, Copy, Heart, Trash } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -105,6 +107,26 @@ export const AyatCard = (props: {
               />
             </button>
           )}
+          <CopyButton
+            content={
+              "s. " +
+              props.ayat.sourate_number +
+              " /v. " +
+              props.ayat.number +
+              "\n" +
+              props.ayat.content
+            }
+          />
+          <ShareButtons
+            content={
+              "s. " +
+              props.ayat.sourate_number +
+              " /v. " +
+              props.ayat.number +
+              "\n" +
+              props.ayat.content
+            }
+          />
         </div>
       </div>
       {props.themes && (

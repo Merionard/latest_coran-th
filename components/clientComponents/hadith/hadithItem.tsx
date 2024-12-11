@@ -22,6 +22,8 @@ import drapeauEn from "../../../public/dr-ru.png";
 import Image from "next/image";
 import { useState } from "react";
 import Link from "next/link";
+import CopyButton from "@/components/ui/copyButton";
+import ShareButtons from "@/components/ui/shareButtons";
 
 type props = {
   hadith: hadith;
@@ -132,6 +134,32 @@ export const HadithItem = ({
                   })}
                 />
               </button>
+              <CopyButton
+                content={
+                  metadata?.bookName +
+                  " " +
+                  metadata?.chapterName +
+                  "\n" +
+                  hadith.hadithReference +
+                  " " +
+                  hadith.inBookReference +
+                  "\n" +
+                  hadith.content
+                }
+              />
+              <ShareButtons
+                content={
+                  metadata?.bookName +
+                  " " +
+                  metadata?.chapterName +
+                  "\n" +
+                  hadith.hadithReference +
+                  " " +
+                  hadith.inBookReference +
+                  "\n" +
+                  hadith.content
+                }
+              />
             </>
           )}
           {session && themeId && (
