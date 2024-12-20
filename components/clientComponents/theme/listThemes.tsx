@@ -2,7 +2,10 @@
 
 import { useMemo, useState, useCallback } from "react";
 import { ThemeWithSubThemes } from "@/app/themes_coran/page";
-import { createNewThemeCoran } from "@/components/serverActions/themeCoranAction";
+import {
+  createNewThemeCoran,
+  findAllThemeWithAyatBySearch,
+} from "@/components/serverActions/themeCoranAction";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -12,12 +15,14 @@ import {
 } from "@/components/ui/collapsible";
 import { SearchInput } from "@/components/ui/searchInput";
 import { cn } from "@/lib/utils";
-import { Grid3X3, List } from "lucide-react";
+import { Grid3X3, List, Search } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { ThemeDialogForm } from "./newThemeDialogForm";
 import { ThemeCard } from "./themeCard";
+import { Input } from "@/components/ui/input";
+import { AyatCard } from "../ayat/ayatCard";
 
 type props = {
   themes: ThemeWithSubThemes[];
@@ -25,7 +30,28 @@ type props = {
 };
 export const ListThemes = ({ themes, admin }: props) => {
   const [search, setSearch] = useState("");
+  const [searchContent, setSearchContent] = useState("");
   const [gridMod, setGridMode] = useState(false);
+  const [ayatsWithThemes, setAyatWithThemes] = useState<
+    Array<
+      {
+        ayats: Array<{
+          number: number;
+          id: number;
+          sourate_number: number;
+          content: string;
+          traduction: string | null;
+          toLearn: boolean;
+        }>;
+      } & {
+        name: string;
+        id: number;
+        parentId: number | null;
+        description: string | null;
+        order: number | null;
+      }
+    >
+  >([]);
   const { theme: colorTheme } = useTheme();
 
   const filteredThemes = useMemo(() => {
@@ -133,6 +159,11 @@ export const ListThemes = ({ themes, admin }: props) => {
     return filteredThemes.map((t) => getAllThemesWithRecursiveSubThemes(t, 0));
   }, [filteredThemes, search, gridMod, getAllThemesWithRecursiveSubThemes]);
 
+  const onContentSearch = async () => {
+    const results = await findAllThemeWithAyatBySearch(searchContent);
+    setAyatWithThemes([...results]);
+  };
+
   return (
     <div>
       <h2 className="text-center text-4xl md:text-6xl text-primary">
@@ -164,19 +195,54 @@ export const ListThemes = ({ themes, admin }: props) => {
           <SearchInput search={search} onSearch={setSearch} />
         </div>
       </div>
-      <Card className="mt-10">
-        {gridMod ? (
-          <CardContent className="p-6">
-            <div className="space-y-3 md:space-y-0 md:grid grid-cols-3 gap-3 mt-5">
+      <div className="flex justify-end gap-3 mt-3">
+        <div className="flex gap-3">
+          <Input
+            value={searchContent}
+            onChange={(e) => setSearchContent(e.target.value)}
+            placeholder={"Recherchez dans les thèmes"}
+            className="w-60"
+          />
+
+          <Button onClick={onContentSearch}>Rechercher dans thèmes</Button>
+          <Button variant={"destructive"} onClick={() => setAyatWithThemes([])}>
+            Clean
+          </Button>
+        </div>
+      </div>
+
+      {ayatsWithThemes.length === 0 ? (
+        <Card className="mt-10">
+          {gridMod ? (
+            <CardContent className="p-6">
+              <div className="space-y-3 md:space-y-0 md:grid grid-cols-3 gap-3 mt-5">
+                {renderThemes()}
+              </div>
+            </CardContent>
+          ) : (
+            <CardContent className="md:py-10 md:pl-20">
               {renderThemes()}
+            </CardContent>
+          )}
+        </Card>
+      ) : (
+        <CardContent className="space-y-2">
+          {ayatsWithThemes.map((theme, index) => (
+            <div key={index}>
+              <h3>{theme.name}</h3>
+              {theme.ayats.map((ayat, i) => (
+                <AyatCard
+                  key={i}
+                  ayat={ayat}
+                  isFavorite={false}
+                  isLearned={false}
+                  titreSourate={""}
+                />
+              ))}
             </div>
-          </CardContent>
-        ) : (
-          <CardContent className="md:py-10 md:pl-20">
-            {renderThemes()}
-          </CardContent>
-        )}
-      </Card>
+          ))}
+        </CardContent>
+      )}
     </div>
   );
 };

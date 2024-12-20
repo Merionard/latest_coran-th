@@ -13,3 +13,6 @@ export const prisma: PrismaClient =
 if (process.env.NODE_ENV !== "production") {
   global.prisma = prisma;
 }
+prisma.$on("query", async (e) => {
+  console.log(`${e.query} ${e.params}`);
+});

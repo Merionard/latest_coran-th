@@ -1,6 +1,7 @@
 "use server";
 
 import { getAuthSession } from "@/lib/auth";
+import { cleanTashkeel } from "@/lib/utils";
 import { prisma } from "@/prisma/client";
 
 export const createNewThemeCoran = async (
@@ -102,4 +103,70 @@ export const deleteTheme = async (themeId: number) => {
   }
 
   return await prisma.theme.delete({ where: { id: themeId } });
+};
+
+export const findAllThemeWithAyatBySearch = async (search: string) => {
+  const cleanSearch = cleanTashkeel(search);
+  if (search.length === 0) {
+    return [];
+  }
+  return await prisma.$queryRaw<
+    Array<
+      {
+        ayats: Array<{
+          number: number;
+          id: number;
+          sourate_number: number;
+          content: string;
+          traduction: string | null;
+          toLearn: boolean;
+        }>;
+      } & {
+        name: string;
+        id: number;
+        parentId: number | null;
+        description: string | null;
+        order: number | null;
+      }
+    >
+  >`
+  SELECT 
+      t."id",
+      t."name",
+      t."parentId",
+      t."description",
+      t."order",
+      json_agg(
+        json_build_object(
+          'id', a."id",
+          'number', a."number",
+          'sourate_number', a."sourate_number",
+          'content', a."content",
+          'traduction', a."traduction",
+          'toLearn', a."toLearn"
+        )
+      ) AS ayats
+  FROM "public"."theme" t
+  INNER JOIN "public"."_AyatThemes" at ON t."id" = at."B"
+  INNER JOIN "public"."ayat" a ON at."A" = a."id"
+  WHERE t."id" IN (
+      SELECT DISTINCT "t1"."B"
+      FROM "public"."_AyatThemes" AS "t1"
+      INNER JOIN "public"."ayat" AS "j1"
+        ON "j1"."id" = "t1"."A"
+      WHERE (
+        "j1"."traduction" ILIKE  ${"%" + search + "%"}
+        OR REGEXP_REPLACE("j1"."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g') ILIKE  ${
+          "%" + cleanSearch + "%"
+        }
+      )
+  )
+  AND (
+      a."traduction" ILIKE  ${"%" + search + "%"}
+      OR REGEXP_REPLACE(a."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g') ILIKE  ${
+        "%" + cleanSearch + "%"
+      }
+  )
+  GROUP BY t."id", t."name", t."parentId", t."description", t."order";
+`;
 };
