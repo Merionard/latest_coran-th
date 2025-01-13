@@ -79,6 +79,9 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
+  corePlugins: {
+    userSelect: true,
+  },
 } satisfies Config;
 
 export default config;

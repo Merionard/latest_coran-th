@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/collapsible";
 import { SearchInput } from "@/components/ui/searchInput";
 import { cn } from "@/lib/utils";
-import { Grid3X3, List, Search } from "lucide-react";
+import { Grid3X3, List, LoaderCircle, Search } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "next-themes";
 import Link from "next/link";
@@ -32,6 +32,7 @@ export const ListThemes = ({ themes, admin }: props) => {
   const [search, setSearch] = useState("");
   const [searchContent, setSearchContent] = useState("");
   const [gridMod, setGridMode] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [ayatsWithThemes, setAyatWithThemes] = useState<
     Array<
       {
@@ -160,8 +161,15 @@ export const ListThemes = ({ themes, admin }: props) => {
   }, [filteredThemes, search, gridMod, getAllThemesWithRecursiveSubThemes]);
 
   const onContentSearch = async () => {
+    setIsSearching(true);
     const results = await findAllThemeWithAyatBySearch(searchContent);
+    setIsSearching(false);
     setAyatWithThemes([...results]);
+  };
+
+  const clean = () => {
+    setAyatWithThemes([]);
+    setSearchContent("");
   };
 
   return (
@@ -199,50 +207,58 @@ export const ListThemes = ({ themes, admin }: props) => {
         <div className="flex gap-3">
           <Input
             value={searchContent}
-            onChange={(e) => setSearchContent(e.target.value)}
+            onChange={(e) => {
+              setSearchContent(e.target.value);
+              if (searchContent.length === 0) {
+              }
+            }}
             placeholder={"Recherchez dans les thèmes"}
             className="w-60"
           />
 
-          <Button onClick={onContentSearch}>Rechercher dans thèmes</Button>
-          <Button variant={"destructive"} onClick={() => setAyatWithThemes([])}>
+          <Button onClick={onContentSearch} disabled={isSearching}>
+            {isSearching && <LoaderCircle className="animate-spin mr-2" />}
+            Rechercher dans thèmes
+          </Button>
+
+          <Button variant={"destructive"} onClick={clean}>
             Clean
           </Button>
         </div>
       </div>
 
-      {ayatsWithThemes.length === 0 ? (
-        <Card className="mt-10">
-          {gridMod ? (
-            <CardContent className="p-6">
-              <div className="space-y-3 md:space-y-0 md:grid grid-cols-3 gap-3 mt-5">
-                {renderThemes()}
-              </div>
-            </CardContent>
-          ) : (
-            <CardContent className="md:py-10 md:pl-20">
+      <CardContent>
+        {ayatsWithThemes.map((theme, index) => (
+          <div key={index} className="space-y-2">
+            <Link href={`/themes_coran/${theme.id}`} className="text-primary">
+              {theme.name}
+            </Link>
+
+            {theme.ayats.map((ayat, i) => (
+              <AyatCard
+                key={i}
+                ayat={ayat}
+                isFavorite={false}
+                isLearned={false}
+                titreSourate={""}
+              />
+            ))}
+          </div>
+        ))}
+      </CardContent>
+      <Card className="mt-3">
+        {gridMod ? (
+          <CardContent className="p-6">
+            <div className="space-y-3 md:space-y-0 md:grid grid-cols-3 gap-3 mt-5">
               {renderThemes()}
-            </CardContent>
-          )}
-        </Card>
-      ) : (
-        <CardContent className="space-y-2">
-          {ayatsWithThemes.map((theme, index) => (
-            <div key={index}>
-              <h3>{theme.name}</h3>
-              {theme.ayats.map((ayat, i) => (
-                <AyatCard
-                  key={i}
-                  ayat={ayat}
-                  isFavorite={false}
-                  isLearned={false}
-                  titreSourate={""}
-                />
-              ))}
             </div>
-          ))}
-        </CardContent>
-      )}
+          </CardContent>
+        ) : (
+          <CardContent className="md:py-10 md:pl-20">
+            {renderThemes()}
+          </CardContent>
+        )}
+      </Card>
     </div>
   );
 };

@@ -120,44 +120,8 @@ export type HadithSearch = {
   traductionFr: string;
   titleTraductionFr: string;
   id: number;
-};
-
-export const FirstSearchHadiths = async (
-  search: string,
-  page: number,
-  pageSize: number
-) => {
-  const offset = (page - 1) * pageSize;
-
-  const [result, totalcount] = await prisma.$transaction([
-    prisma.$queryRaw<HadithSearch[]>`
-      SELECT h.* ,hb."titleTraductionFr"
-      FROM "hadith" h
-      JOIN  "hadithChapter" hc on hc.id = h.hadith_chapter 
-      JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
-      WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
-      ILIKE ${"%" + search + "%"}
-      OR h."traductionFr" ILIKE ${"%" + search + "%"}
-      LIMIT ${pageSize}
-      OFFSET ${offset}
-    `,
-    prisma.$queryRaw<number>`
-      SELECT COUNT(*) as totalcount
-      FROM "hadith" h
-      JOIN  "hadithChapter" hc on hc.id = h.hadith_chapter 
-      JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id 
-      WHERE REGEXP_REPLACE(h."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g')
-      ILIKE ${"%" + search + "%"}
-      OR h."traductionFr" ILIKE  ${"%" + search + "%"}
-    `,
-  ]);
-  //@ts-ignore
-  console.log("nombre enregistrement " + Number(totalcount[0].totalcount));
-  return {
-    ayats: result,
-    //@ts-ignore
-    totalCount: Number(totalcount[0].totalcount),
-  };
+  bookId: number;
+  chapterId: number;
 };
 
 export const searchHadiths = async (
@@ -174,7 +138,9 @@ export const searchHadiths = async (
       h.content,
       h."traductionEn",
       h."traductionFr",
-      hb."titleTraductionFr"
+      hb."titleTraductionFr",
+      hc.id as "chapterId",
+      hb.id as "bookId"
     FROM "hadith" h
     JOIN "hadithChapter" hc ON hc.id = h.hadith_chapter
     JOIN "hadithBook" hb ON hb.id = hc.hadith_book_id

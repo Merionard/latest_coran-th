@@ -13,3 +13,7 @@ export const cleanTashkeel = (text: string) => {
   ayatWhitoutHarakts = ayatWhitoutHarakts.replace(/(ى)/g, "ي");
   return ayatWhitoutHarakts;
 };
+
+export function removeAccents(str: string) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}

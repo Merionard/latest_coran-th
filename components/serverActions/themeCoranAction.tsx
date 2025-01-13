@@ -1,7 +1,7 @@
 "use server";
 
 import { getAuthSession } from "@/lib/auth";
-import { cleanTashkeel } from "@/lib/utils";
+import { cleanTashkeel, removeAccents } from "@/lib/utils";
 import { prisma } from "@/prisma/client";
 
 export const createNewThemeCoran = async (
@@ -107,6 +107,7 @@ export const deleteTheme = async (themeId: number) => {
 
 export const findAllThemeWithAyatBySearch = async (search: string) => {
   const cleanSearch = cleanTashkeel(search);
+  const searchWithoutAccent = removeAccents(search);
   if (search.length === 0) {
     return [];
   }
@@ -155,14 +156,14 @@ export const findAllThemeWithAyatBySearch = async (search: string) => {
       INNER JOIN "public"."ayat" AS "j1"
         ON "j1"."id" = "t1"."A"
       WHERE (
-        "j1"."traduction" ILIKE  ${"%" + search + "%"}
+        unaccent("j1"."traduction") ILIKE  ${"%" + searchWithoutAccent + "%"}
         OR REGEXP_REPLACE("j1"."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g') ILIKE  ${
           "%" + cleanSearch + "%"
         }
       )
   )
   AND (
-      a."traduction" ILIKE  ${"%" + search + "%"}
+      unaccent(a."traduction") ILIKE  ${"%" + searchWithoutAccent + "%"}
       OR REGEXP_REPLACE(a."content", '[\u064B-\u065F\u0670\u06D6-\u06ED\u0671\u0673]', '', 'g') ILIKE  ${
         "%" + cleanSearch + "%"
       }

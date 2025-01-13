@@ -9,6 +9,7 @@ import { cleanTashkeel } from "@/lib/utils";
 import { Loader } from "lucide-react";
 import { useCallback, useState } from "react";
 import { Pagination } from "../transverse/pagination";
+import Link from "next/link";
 
 interface HighlightedTextProps {
   text: string;
@@ -66,9 +67,14 @@ const HadithCard: React.FC<HadithCardProps> = ({ hadith, searchTerm }) => (
       <h3 className="text-xl font-bold text-primary">
         {hadith.titleTraductionFr}
       </h3>
-      <span className="text-sm font-medium bg-primary/10 px-2 py-1 rounded-full">
-        Hadith n°{hadith.hadithReference}
-      </span>
+      <Link
+        href={`/hadith/${hadith.bookId}/${hadith.chapterId}`}
+        target="_blank"
+      >
+        <span className="text-sm font-medium bg-primary/10 px-2 py-1 rounded-full">
+          Hadith n°{hadith.hadithReference}
+        </span>
+      </Link>
     </div>
     <p className="text-2xl text-right leading-relaxed">
       <HighlightedText
