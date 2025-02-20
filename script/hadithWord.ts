@@ -124,29 +124,58 @@ async function createWordDocuments(bookId: number) {
 
       for (const hadith of sortedHadiths) {
         children.push(
+          // Paragraphe pour la référence du hadith
           new Paragraph({
             children: [
               new TextRun({ text: `[${hadith.hadithReference}] `, bold: true }),
+            ],
+          }),
+
+          // Paragraphe pour le contenu du hadith
+          new Paragraph({
+            alignment: AlignmentType.RIGHT,
+            children: [
               new TextRun({
                 text: hadith.content,
-                font: {
-                  name: "Inter",
-                },
-                size: 28,
+                font: { name: "Inter" },
+                size: 40,
                 rightToLeft: true,
               }),
+            ],
+          }),
+
+          // Paragraphe vide pour ajouter un espace
+          new Paragraph({}),
+
+          // Paragraphe pour le narrateur
+          new Paragraph({
+            children: [
               new TextRun({
                 text: ` - ${hadith.narratorFr}`,
                 italics: true,
                 size: 28,
+                rightToLeft: false,
               }),
+            ],
+          }),
+
+          // Paragraphe vide pour ajouter un espace
+          new Paragraph({}),
+
+          // Paragraphe pour la traduction
+          new Paragraph({
+            alignment: AlignmentType.JUSTIFIED,
+            children: [
               new TextRun({
                 text: ` - ${hadith.traductionFr}`,
                 italics: true,
                 size: 28,
+                rightToLeft: false,
               }),
             ],
           }),
+
+          // Deux Paragraphs vides pour ajouter un espace après chaque hadith
           new Paragraph({}),
           new Paragraph({})
         );
